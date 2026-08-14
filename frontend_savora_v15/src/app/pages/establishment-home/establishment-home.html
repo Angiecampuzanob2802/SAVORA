@@ -1,0 +1,612 @@
+<main class="est-shell">
+  <header class="est-header">
+    <a routerLink="/" class="brand" aria-label="Volver al inicio de SAVORA">
+      <span>
+        <img src="/landing/carrito.png" alt="SAVORA">
+      </span>
+      <strong>SAVORA</strong>
+    </a>
+
+    <nav aria-label="Navegación de establecimiento">
+      <a routerLink="/perfil">
+        <i class="fa-solid fa-user"></i>
+        Perfil
+      </a>
+      <a *ngIf="session.canAccess('admin')" routerLink="/admin">
+        <i class="fa-solid fa-chart-simple"></i>
+        Panel
+      </a>
+      <a *ngIf="session.canAccess('cliente')" routerLink="/cliente">
+        <i class="fa-solid fa-store"></i>
+        Tienda
+      </a>
+      <a *ngIf="session.canAccess('logistica')" routerLink="/logistica">
+        <i class="fa-solid fa-truck-fast"></i>
+        Logística
+      </a>
+      <a routerLink="/notificaciones">
+        <i class="fa-solid fa-bell"></i>
+        Notificaciones
+        <span class="nav-badge" *ngIf="notifications.unreadCount()">
+          {{ notifications.unreadCount() }}
+        </span>
+      </a>
+      <button type="button" class="ghost-button" (click)="goBack()">
+        <i class="fa-solid fa-arrow-left"></i>
+        Volver
+      </button>
+      <button type="button" class="ghost-button danger" (click)="logout()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Salir
+      </button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Aliado SAVORA</p>
+      <h1>Hola {{ user()?.nombre || 'aliado' }}, publica ofertas frescas antes de que se pierdan.</h1>
+      <p>
+        Administra inventario, pedidos y alertas de vencimiento desde un panel pensado para
+        restaurantes, panaderías, hoteles y supermercados.
+      </p>
+
+      <div class="hero-actions">
+        <button type="button" class="primary-action" (click)="scrollToSection('nuevo-producto')">
+          <i class="fa-solid fa-plus"></i>
+          Agregar producto
+        </button>
+        <button type="button" class="secondary-action" (click)="scrollToSection('pedidos')">
+          <i class="fa-solid fa-receipt"></i>
+          Ver pedidos
+        </button>
+        <button type="button" class="light-action" (click)="scrollToSection('catalogo')">
+          <i class="fa-solid fa-store"></i>
+          Ver catálogo
+        </button>
+      </div>
+    </div>
+
+    <aside class="ally-card">
+      <div class="ally-card-top">
+        <div class="ally-icon-stack">
+          <span class="ally-icon">
+            <img src="/landing/carrito.png" alt="">
+          </span>
+          <span class="store-badge" aria-hidden="true">
+            <i class="fa-solid fa-store"></i>
+          </span>
+        </div>
+
+        <span class="connection-pill" [class.pending]="!currentEstablishment()">
+          {{ currentEstablishment() ? 'Conectado' : 'Pendiente' }}
+        </span>
+      </div>
+
+      <p>Establecimiento conectado</p>
+      <h2>{{ currentEstablishment()?.nombre || 'Pendiente de asociación' }}</h2>
+      <small>
+        {{ currentEstablishment()?.tipo || 'Aliado' }}
+        <ng-container *ngIf="currentEstablishment()?.ciudad">
+          · {{ currentEstablishment()?.ciudad }}
+        </ng-container>
+      </small>
+    </aside>
+  </section>
+
+  <section class="metric-grid" aria-label="Resumen del establecimiento">
+    <article *ngFor="let item of metricCards()" [class]="'metric-card ' + item.tone">
+      <div class="metric-icon">
+        <i [class]="item.icon"></i>
+      </div>
+      <div>
+        <span>{{ item.label }}</span>
+        <strong>{{ item.value }}</strong>
+        <small>{{ item.helper }}</small>
+      </div>
+    </article>
+  </section>
+
+  <section class="notice success" *ngIf="message()">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>{{ message() }}</span>
+  </section>
+
+  <section class="notice error" *ngIf="error()">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>{{ error() }}</span>
+  </section>
+
+  <section class="notice warning" *ngIf="!currentEstablishment()">
+    <i class="fa-solid fa-store-slash"></i>
+    <span>
+      Tu usuario aún no tiene un establecimiento asociado. Cuando el administrador apruebe la solicitud,
+      podrás publicar productos y gestionar pedidos desde este panel.
+    </span>
+  </section>
+
+  <section class="work-grid">
+    <article class="form-card" id="nuevo-producto">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow">Nuevo producto</p>
+          <h2>Publicar producto</h2>
+        </div>
+        <span class="auto-id">
+          <i class="fa-solid fa-shield-halved"></i>
+          ID automático
+        </span>
+      </div>
+
+      <div class="form-section">
+        <h3>
+          <i class="fa-solid fa-utensils"></i>
+          Información del producto
+        </h3>
+
+        <label>
+          Nombre
+          <input
+            type="text"
+            [value]="productForm().nombre"
+            (input)="updateForm('nombre', $event)"
+            placeholder="Ej: Pan integral, almuerzo saludable..."
+          />
+        </label>
+
+        <label>
+          Descripción detallada del plato
+          <textarea
+            [value]="productForm().descripcion"
+            (input)="updateForm('descripcion', $event)"
+            maxlength="255"
+            rows="5"
+            placeholder="Ej.: Raviolis artesanales rellenos de cerdo cocinado a fuego lento, preparados con masa de zanahoria, queso y especias. Incluye ensalada fresca."
+            aria-describedby="product-description-help product-description-count"
+          ></textarea>
+          <small id="product-description-help" class="field-help">
+            Indica ingredientes principales, preparación, acompañamientos, porción y alérgenos relevantes.
+          </small>
+          <small id="product-description-count" class="field-counter">
+            {{ productForm().descripcion.length }}/255
+          </small>
+        </label>
+
+        <label>
+          Categoría
+          <select [value]="productForm().id_categoria" (change)="updateForm('id_categoria', $event)">
+            <option *ngFor="let category of categories()" [value]="category.id_categoria">
+              {{ category.nombre }}
+            </option>
+          </select>
+        </label>
+      </div>
+
+      <div class="form-section">
+        <h3>
+          <i class="fa-solid fa-tags"></i>
+          Precio y promoción
+        </h3>
+
+        <div class="form-row">
+          <label>
+            Precio normal
+            <input
+              type="number"
+              [value]="productForm().precio_costo"
+              (input)="updateForm('precio_costo', $event)"
+              min="0"
+            />
+          </label>
+
+          <label>
+            Precio oferta
+            <input
+              type="number"
+              [value]="productForm().precio_venta"
+              (input)="updateForm('precio_venta', $event)"
+              min="0"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>
+          <i class="fa-solid fa-boxes-stacked"></i>
+          Inventario y vencimiento
+        </h3>
+
+        <div class="form-row">
+          <label>
+            Stock disponible
+            <input
+              type="number"
+              [value]="productForm().stock"
+              (input)="updateForm('stock', $event)"
+              min="1"
+            />
+          </label>
+
+          <label>
+            Fecha de vencimiento
+            <input
+              type="date"
+              [value]="productForm().fecha_vencimiento"
+              (input)="updateForm('fecha_vencimiento', $event)"
+            />
+          </label>
+        </div>
+
+        <label>
+          Hora límite de consumo
+          <input
+            type="time"
+            [value]="productForm().hora_limite_consumo"
+            (input)="updateForm('hora_limite_consumo', $event)"
+          />
+        </label>
+      </div>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="createProduct()"
+        [disabled]="saving() || !currentEstablishment()"
+      >
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        {{ saving() ? 'Guardando...' : 'Publicar producto' }}
+      </button>
+    </article>
+
+    <aside class="insights">
+      <article class="alert-card expiry" *ngIf="expiryAlerts().length">
+        <div class="card-heading compact">
+          <div>
+            <p class="eyebrow">Alertas visibles</p>
+            <h2>Próximos a vencer</h2>
+          </div>
+          <strong>{{ expiryAlerts().length }}</strong>
+        </div>
+
+        <div class="mini-row animated" *ngFor="let product of expiryAlerts().slice(0, 4)">
+          <span class="pulse-dot"></span>
+          <div>
+            <b>{{ product.nombre }}</b>
+            <small>{{ expiryText(product) }} · Stock {{ product.stock || 0 }}</small>
+          </div>
+        </div>
+      </article>
+
+      <article class="alert-card">
+        <div class="card-heading compact">
+          <div>
+            <p class="eyebrow">Inventario</p>
+            <h2>Stock bajo</h2>
+          </div>
+          <strong>{{ lowStock().length }}</strong>
+        </div>
+
+        <p class="empty-state" *ngIf="lowStock().length === 0">
+          No hay productos en alerta. Tu inventario se ve estable.
+        </p>
+
+        <div class="mini-row" *ngFor="let product of lowStock().slice(0, 5)">
+          <img [src]="productImage(product)" [alt]="product.nombre">
+          <div>
+            <b>{{ product.nombre }}</b>
+            <small>{{ product.stock || 0 }} unidades disponibles</small>
+          </div>
+        </div>
+      </article>
+    </aside>
+  </section>
+
+  <section class="orders-card" id="pedidos">
+    <div class="card-heading">
+      <div>
+        <p class="eyebrow">Pedidos</p>
+        <h2>Pedidos recibidos</h2>
+      </div>
+      <span>{{ pendingOrders().length }} resultado(s)</span>
+    </div>
+
+    <div class="status-filters">
+      <button
+        type="button"
+        *ngFor="let status of orderStatusFilters"
+        [class.active]="selectedOrderStatus() === status"
+        (click)="setOrderStatus(status)"
+      >
+        {{ status }}
+      </button>
+    </div>
+
+    <p class="empty-state" *ngIf="pendingOrders().length === 0">
+      No hay pedidos para este filtro.
+    </p>
+
+    <div class="order-list">
+      <article class="order-row" *ngFor="let order of pendingOrders()">
+        <div class="order-main">
+          <span [class]="'status-pill ' + statusClass(order.estado_pedido)">
+            {{ order.estado_pedido }}
+          </span>
+          <strong>Pedido #{{ order.id_pedido }}</strong>
+          <small>{{ order.fecha_pedido || 'Sin fecha' }} · {{ order.metodo_pago || 'Sin pago' }}</small>
+        </div>
+
+        <div class="order-meta">
+          <b>{{ order.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</b>
+          <small>{{ order.direccion_entrega || 'Sin dirección' }}</small>
+        </div>
+
+        <button type="button" (click)="openOrderDetail(order)">
+          Ver detalle
+        </button>
+      </article>
+    </div>
+  </section>
+
+  <section class="catalog-card" id="catalogo">
+    <div class="card-heading">
+      <div>
+        <p class="eyebrow">Catálogo</p>
+        <h2>Productos publicados</h2>
+      </div>
+      <span>{{ myProducts().length }} producto(s)</span>
+    </div>
+
+    <p class="empty-state" *ngIf="myProducts().length === 0">
+      Aún no tienes productos publicados.
+    </p>
+
+    <div class="product-grid">
+      <article class="product-card" *ngFor="let product of myProducts()">
+        <div class="product-image">
+          <img [src]="productImage(product)" [alt]="product.nombre">
+          <span>{{ product.estado_producto === false ? 'Pausado' : 'Activo' }}</span>
+        </div>
+
+        <div class="product-body">
+          <small>{{ categoryName(product.id_categoria) }}</small>
+          <div class="product-title-row">
+            <h3>{{ product.nombre }}</h3>
+            <button
+              type="button"
+              class="product-detail-trigger"
+              aria-haspopup="dialog"
+              [attr.aria-label]="'Ver detalle de ' + product.nombre"
+              data-tooltip="Ver ingredientes y preparación"
+              (click)="openProductDetail(product)"
+            >
+              <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="product-meta">
+            <strong>{{ product.precio_venta | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+            <span>Stock {{ product.stock || 0 }}</span>
+          </div>
+
+          <small class="expiry-line">{{ expiryText(product) }}</small>
+        </div>
+
+        <div class="product-card-actions">
+          <button type="button" class="edit-product-button" (click)="openProductEdit(product)">
+            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+            Editar
+          </button>
+          <button type="button" class="status-product-button" (click)="toggleProduct(product)">
+            {{ product.estado_producto === false ? 'Activar' : 'Pausar' }}
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section
+    class="modal-backdrop"
+    *ngIf="selectedOrder() || selectedProduct() || editingProduct()"
+    (click)="closeOpenDetails()"
+  ></section>
+
+  <aside
+    class="detail-modal product-detail-modal"
+    *ngIf="selectedProduct() as product"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="establishment-product-detail-title"
+  >
+    <header>
+      <div>
+        <p class="eyebrow">Detalle del producto</p>
+        <h2 id="establishment-product-detail-title">{{ product.nombre }}</h2>
+      </div>
+
+      <button type="button" (click)="closeProductDetail()" aria-label="Cerrar detalle del producto">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        Cerrar
+      </button>
+    </header>
+
+    <div class="product-detail-hero">
+      <div class="product-detail-image">
+        <img [src]="productImage(product)" [alt]="product.nombre">
+      </div>
+
+      <div class="product-detail-summary">
+        <span class="detail-category">{{ categoryName(product.id_categoria) }}</span>
+        <strong>{{ product.precio_venta | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+        <small>{{ expiryText(product) }}</small>
+      </div>
+    </div>
+
+    <section class="description-panel">
+      <h3>
+        <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+        Ingredientes y preparación
+      </h3>
+      <p>{{ product.descripcion || 'El establecimiento todavía no ha registrado el detalle del producto.' }}</p>
+    </section>
+
+    <dl class="detail-grid">
+      <div>
+        <dt>Categoría</dt>
+        <dd>{{ categoryName(product.id_categoria) }}</dd>
+      </div>
+      <div>
+        <dt>Stock disponible</dt>
+        <dd>{{ product.stock || 0 }} unidad(es)</dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd>{{ product.estado_producto === false ? 'Pausado' : 'Activo' }}</dd>
+      </div>
+      <div>
+        <dt>Consumo recomendado</dt>
+        <dd>{{ expiryText(product) }}</dd>
+      </div>
+    </dl>
+  </aside>
+
+  <aside
+    class="detail-modal edit-product-modal"
+    *ngIf="editingProduct() as product"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="edit-product-title"
+  >
+    <header>
+      <div>
+        <p class="eyebrow">Editar producto</p>
+        <h2 id="edit-product-title">{{ product.nombre }}</h2>
+      </div>
+      <button
+        type="button"
+        (click)="closeProductEdit()"
+        [disabled]="savingEdit()"
+        aria-label="Cerrar edición del producto"
+      >
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <div class="edit-product-form">
+      <label>
+        Nombre del producto
+        <input
+          type="text"
+          maxlength="100"
+          [value]="productEditForm().nombre"
+          (input)="updateEditForm('nombre', $event)"
+        />
+      </label>
+
+      <label>
+        Descripción detallada del plato
+        <textarea
+          rows="6"
+          maxlength="255"
+          [value]="productEditForm().descripcion"
+          (input)="updateEditForm('descripcion', $event)"
+          aria-describedby="edit-description-help edit-description-count"
+        ></textarea>
+        <small id="edit-description-help" class="field-help">
+          Incluye ingredientes, preparación, acompañamientos, porción y alérgenos relevantes.
+        </small>
+        <small id="edit-description-count" class="field-counter">
+          {{ productEditForm().descripcion.length }}/255
+        </small>
+      </label>
+
+      <div class="form-row">
+        <label>
+          Precio normal
+          <input
+            type="number"
+            min="0"
+            [value]="productEditForm().precio_costo"
+            (input)="updateEditForm('precio_costo', $event)"
+          />
+        </label>
+
+        <label>
+          Precio de oferta
+          <input
+            type="number"
+            min="1"
+            [value]="productEditForm().precio_venta"
+            (input)="updateEditForm('precio_venta', $event)"
+          />
+        </label>
+      </div>
+    </div>
+
+    <footer class="edit-product-footer">
+      <button type="button" class="secondary-action" (click)="closeProductEdit()" [disabled]="savingEdit()">
+        Cancelar
+      </button>
+      <button type="button" class="primary-button" (click)="saveProductEdit()" [disabled]="savingEdit()">
+        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+        {{ savingEdit() ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </footer>
+  </aside>
+
+  <aside class="detail-modal" *ngIf="selectedOrder() as order">
+    <header>
+      <div>
+        <p class="eyebrow">Detalle de pedido</p>
+        <h2>Pedido #{{ order.id_pedido }}</h2>
+      </div>
+
+      <button type="button" (click)="closeOrderDetail()">
+        <i class="fa-solid fa-xmark"></i>
+        Cerrar
+      </button>
+    </header>
+
+    <dl class="detail-grid">
+      <div>
+        <dt>Estado</dt>
+        <dd>{{ order.estado_pedido }}</dd>
+      </div>
+
+      <div>
+        <dt>Total</dt>
+        <dd>{{ order.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</dd>
+      </div>
+
+      <div>
+        <dt>Dirección</dt>
+        <dd>{{ order.direccion_entrega || 'Sin dirección' }}</dd>
+      </div>
+
+      <div>
+        <dt>Pago</dt>
+        <dd>{{ order.metodo_pago || 'Sin pago' }}</dd>
+      </div>
+    </dl>
+
+    <label class="status-control">
+      Cambiar estado
+      <select [value]="order.estado_pedido" (change)="updateOrderStatus(order, $event)">
+        <option value="Pendiente">Pendiente</option>
+        <option value="Preparando">Preparando</option>
+        <option value="Listo para entregar">Listo para entregar</option>
+        <option value="En camino">En camino</option>
+        <option value="Entregado">Entregado</option>
+        <option value="Cancelado">Cancelado</option>
+      </select>
+    </label>
+
+    <div class="modal-lines">
+      <div *ngFor="let item of selectedOrderItems()">
+        <span>{{ productName(item.id_producto) }}</span>
+        <span>x {{ item.cantidad }}</span>
+        <strong>{{ item.subtotal | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+      </div>
+    </div>
+  </aside>
+</main>

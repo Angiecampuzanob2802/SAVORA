@@ -1,0 +1,310 @@
+<main class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <img src="/landing/carrito.png" alt="SAVORA">
+      </span>
+
+      <div>
+        <h1>SAVORA</h1>
+        <p>Panel operativo</p>
+      </div>
+    </div>
+
+    <a class="back-home" routerLink="/">Volver al inicio</a>
+    <a class="back-home" routerLink="/perfil">Mi perfil</a>
+    <a class="back-home" routerLink="/notificaciones">
+      Notificaciones
+      <span class="nav-badge" *ngIf="notifications.unreadCount()">
+        {{ notifications.unreadCount() }}
+      </span>
+    </a>
+
+    <button type="button" class="logout-button" (click)="goBack()">Volver atrás</button>
+    <button type="button" class="logout-button" (click)="logout()">Cerrar sesión</button>
+
+    <nav class="module-list" aria-label="Módulos">
+      <button
+        type="button"
+        *ngFor="let resource of resources"
+        [class.active]="selected().name === resource.name"
+        (click)="selectResource(resource)"
+      >
+        {{ resource.title }}
+      </button>
+    </nav>
+  </aside>
+
+  <section class="content">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Panel administrativo</p>
+        <h2>{{ selected().title }}</h2>
+        <p>{{ selected().description }}</p>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button" class="ghost" (click)="load()">Actualizar</button>
+        <button type="button" class="refresh" (click)="openCreate()">Nuevo registro</button>
+      </div>
+    </header>
+
+    <section class="dashboard-cards" aria-label="Resumen principal">
+      <article *ngFor="let item of dashboardCards()" [class]="'metric-card ' + item.tone">
+        <div class="metric-icon">
+          <i [class]="item.icon"></i>
+        </div>
+
+        <span>{{ item.label }}</span>
+        <strong>{{ item.value }}</strong>
+      </article>
+    </section>
+
+    <section class="quick-actions" aria-label="Acciones rápidas">
+      <button type="button" (click)="quickAction('productos')">
+        <i class="fa-solid fa-plus"></i>
+        Agregar producto
+      </button>
+
+      <button type="button" (click)="quickAction('promociones')">
+        <i class="fa-solid fa-tags"></i>
+        Crear promoción
+      </button>
+
+      <button type="button" (click)="quickAction('movimientos')">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        Registrar compra
+      </button>
+
+      <button type="button" (click)="quickAction('pedidos')">
+        <i class="fa-solid fa-receipt"></i>
+        Ver pedidos
+      </button>
+
+      <button type="button" (click)="quickAction('entregas')">
+        <i class="fa-solid fa-truck-fast"></i>
+        Programar entrega
+      </button>
+    </section>
+
+    <section class="expiry-alerts" *ngIf="alertasPromocion().length">
+      <div class="alert-heading">
+        <div>
+          <p class="eyebrow">Alertas visibles</p>
+          <h3>Productos próximos a vencer</h3>
+        </div>
+
+        <span>{{ alertasPromocion().length }} alerta(s)</span>
+      </div>
+
+      <div class="alert-track">
+        <article class="expiry-card" *ngFor="let product of alertasPromocion()">
+          <span class="pulse-dot"></span>
+
+          <div>
+            <strong>{{ product['nombre'] }}</strong>
+            <p>
+              Vence en {{ daysUntil(valueAsString(product['fecha_vencimiento'])) }} día(s) ·
+              Stock {{ product['stock'] || 0 }}
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="report-panel">
+      <header>
+        <div>
+          <p class="eyebrow">Reportes</p>
+          <h3>Resumen operativo</h3>
+        </div>
+
+        <div class="range-actions">
+          <button
+            type="button"
+            *ngFor="let range of reportRanges"
+            [class.active]="reportFilter() === range.value"
+            (click)="setReportFilter(range.value)"
+          >
+            {{ range.label }}
+          </button>
+        </div>
+      </header>
+
+      <div class="report-grid">
+        <article>
+          <h4>Pedidos por estado</h4>
+          <p *ngIf="pedidosPorEstado().length === 0">Sin datos.</p>
+
+          <div class="report-row" *ngFor="let item of pedidosPorEstado()">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </div>
+        </article>
+
+        <article>
+          <h4>Entregas por estado</h4>
+          <p *ngIf="entregasPorEstado().length === 0">Sin datos.</p>
+
+          <div class="report-row" *ngFor="let item of entregasPorEstado()">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </div>
+        </article>
+
+        <article>
+          <h4>Productos más vendidos</h4>
+          <p *ngIf="productosMasVendidos().length === 0">Sin datos.</p>
+
+          <div class="report-row" *ngFor="let item of productosMasVendidos()">
+            <span>{{ item.nombre }} - {{ item.cantidad }} und.</span>
+            <strong>{{ item.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+          </div>
+        </article>
+
+        <article>
+          <h4>Productos críticos</h4>
+          <p *ngIf="productosCriticos().length === 0">Sin datos.</p>
+
+          <div class="report-row" *ngFor="let product of productosCriticos()">
+            <span>{{ product['nombre'] }}</span>
+            <strong>{{ product['stock'] }} und.</strong>
+          </div>
+        </article>
+      </div>
+
+      <div class="export-actions">
+        <button type="button" (click)="exportCsv('pedidos', allPedidos())">Exportar pedidos</button>
+        <button type="button" (click)="exportCsv('productos', allProductos())">
+          Exportar productos
+        </button>
+        <button type="button" (click)="exportCsv('entregas', allEntregas())">
+          Exportar entregas
+        </button>
+        <button type="button" (click)="exportCurrentCsv()">Exportar módulo actual</button>
+      </div>
+    </section>
+
+    <div class="status error" *ngIf="error()">{{ error() }}</div>
+    <div class="status success" *ngIf="message()">{{ message() }}</div>
+
+    <section class="table-panel">
+      <div class="table-header">
+        <div>
+          <h3>Registros</h3>
+          <p>{{ filteredRows().length }} resultados en {{ selected().title }}</p>
+        </div>
+
+        <div class="table-tools">
+          <label class="search">
+            <span>Buscar</span>
+            <input
+              type="search"
+              placeholder="Nombre, estado, precio..."
+              [value]="searchTerm()"
+              (input)="updateSearch($event)"
+            />
+          </label>
+
+          <span class="loading" *ngIf="loading()">Cargando...</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th *ngFor="let column of selected().columns">{{ column }}</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let row of filteredRows()">
+              <td *ngFor="let column of selected().columns">
+                {{ displayValue(row[column]) }}
+              </td>
+
+              <td class="actions">
+                <button
+                  type="button"
+                  class="approve-action"
+                  *ngIf="isBusinessRequestResource() && !businessRequestApproved(row)"
+                  (click)="approveBusinessRequest(row)"
+                >
+                  Aprobar
+                </button>
+
+                <button
+                  type="button"
+                  class="approved-action"
+                  *ngIf="isBusinessRequestResource() && businessRequestApproved(row)"
+                  disabled
+                >
+                  Aprobada
+                </button>
+
+                <button type="button" (click)="edit(row)">Editar</button>
+                <button type="button" class="danger" (click)="remove(row)">Eliminar</button>
+              </td>
+            </tr>
+
+            <tr *ngIf="!loading() && filteredRows().length === 0">
+              <td [attr.colspan]="selected().columns.length + 1">
+                No hay registros que coincidan con la búsqueda.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="drawer-backdrop" *ngIf="editorOpen()" (click)="cancelEdit()"></section>
+
+  <aside class="editor-drawer" *ngIf="editorOpen()" aria-label="Editor de registro">
+    <form class="editor" [formGroup]="form()" (ngSubmit)="save()">
+      <div class="editor-heading">
+        <div>
+          <span>{{ selected().title }}</span>
+          <h3>{{ editing() ? 'Editar registro' : 'Nuevo registro' }}</h3>
+        </div>
+
+        <button type="button" aria-label="Cerrar editor" (click)="cancelEdit()">Cerrar</button>
+      </div>
+
+      <div class="form-grid">
+        <label *ngFor="let field of selected().fields" [class.checkbox]="field.type === 'boolean'">
+          <span>{{ field.label }}</span>
+
+          <input
+            *ngIf="field.type !== 'boolean' && field.type !== 'select'"
+            [type]="fieldInputType(field)"
+            [formControlName]="field.key"
+          />
+
+          <select *ngIf="field.type === 'select'" [formControlName]="field.key">
+            <option value="">Seleccionar</option>
+
+            <option
+              *ngFor="let option of lookups()[field.key] || []"
+              [ngValue]="optionValue(option, field)"
+            >
+              {{ optionLabel(option, field) }}
+            </option>
+          </select>
+
+          <input *ngIf="field.type === 'boolean'" type="checkbox" [formControlName]="field.key" />
+        </label>
+      </div>
+
+      <div class="editor-actions">
+        <button type="button" class="ghost" (click)="cancelEdit()">Cancelar</button>
+
+        <button type="submit" class="primary">
+          {{ editing() ? 'Guardar cambios' : 'Crear registro' }}
+        </button>
+      </div>
+    </form>
+  </aside>
+</main>

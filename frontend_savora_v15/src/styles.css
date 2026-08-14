@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --savora-green-dark: #173426;
+  --savora-green: #245b2a;
+  --savora-green-soft: #eaf5e3;
+  --savora-orange: #f28c28;
+  --savora-yellow: #f5b942;
+  --savora-red: #e74c3c;
+  --savora-bg: #f7f8f5;
+  --savora-text: #1f2a1f;
+  --savora-muted: #667066;
+  --savora-white: #ffffff;
+  --savora-border: #dce6d7;
+  --savora-shadow: 0 22px 60px rgba(23, 52, 38, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', Arial, sans-serif;
+  background: var(--savora-bg);
+  color: var(--savora-text);
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Inter', Arial, sans-serif;
+  background: var(--savora-bg);
+  color: var(--savora-text);
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Fraunces', 'Inter', Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.brand,
+button,
+.nav-action,
+.primary-action,
+.secondary-action {
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.nav-badge {
+  align-items: center;
+  background: var(--savora-orange);
+  border-radius: 999px;
+  color: var(--savora-white);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  justify-content: center;
+  min-width: 24px;
+  padding: 4px 7px;
+}
+
+::selection {
+  background: var(--savora-orange);
+  color: var(--savora-white);
+}

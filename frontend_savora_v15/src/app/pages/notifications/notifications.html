@@ -1,0 +1,102 @@
+<main class="notifications-shell">
+  <header class="topbar">
+    <a routerLink="/" class="brand">
+      <span>
+        <img src="/landing/carrito.png" alt="SAVORA">
+      </span>
+      SAVORA
+    </a>
+
+    <nav aria-label="Menu de notificaciones">
+      <a *ngIf="session.canAccess('cliente')" routerLink="/cliente">Tienda</a>
+      <a *ngIf="session.canAccess('establecimiento')" routerLink="/establecimiento">Establecimiento</a>
+      <a *ngIf="session.canAccess('logistica')" routerLink="/logistica">Logistica</a>
+      <a *ngIf="session.canAccess('admin')" routerLink="/admin">Admin</a>
+      <a routerLink="/perfil">Perfil</a>
+      <button type="button" (click)="goBack()">Volver</button>
+      <button type="button" (click)="logout()">Salir</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Centro de notificaciones</p>
+      <h1>Alertas claras para que nada importante se te pase.</h1>
+      <p>
+        Consulta pedidos, entregas, promociones y avisos del sistema en tiempo real. Las notificaciones sin revisar
+        se resaltan para que puedas actuar rapido.
+      </p>
+
+      <div class="hero-actions">
+        <button type="button" (click)="notifications.load()">Actualizar</button>
+        <button type="button" class="ghost" (click)="markAllAsRead()" [disabled]="notifications.unreadCount() === 0">
+          Marcar todas
+        </button>
+        <button type="button" class="ghost" (click)="goToPrimaryRoute()">Ir a mi modulo</button>
+      </div>
+    </div>
+
+    <aside class="hero-panel">
+      <div class="notification-orbit">
+        <span>AV</span>
+      </div>
+      <p>No leidas</p>
+      <strong>{{ notifications.unreadCount() }}</strong>
+      <small *ngIf="latestNotification() as latest">
+        Ultima: {{ latest.titulo || 'Notificacion' }}
+      </small>
+      <small *ngIf="!latestNotification()">Aun no tienes alertas nuevas.</small>
+    </aside>
+  </section>
+
+  <section class="summary-cards" aria-label="Resumen de notificaciones">
+    <button
+      type="button"
+      *ngFor="let item of filterCards()"
+      [class.active]="filter() === item.key"
+      (click)="setFilter(item.key)"
+    >
+      <span>{{ item.label }}</span>
+      <strong>{{ item.value }}</strong>
+      <small>{{ item.detail }}</small>
+    </button>
+  </section>
+
+  <section class="filters">
+    <button type="button" [class.active]="filter() === 'todas'" (click)="setFilter('todas')">Todas</button>
+    <button type="button" [class.active]="filter() === 'no-leidas'" (click)="setFilter('no-leidas')">No leidas</button>
+    <button type="button" [class.active]="filter() === 'leidas'" (click)="setFilter('leidas')">Leidas</button>
+    <button type="button" class="ghost" (click)="notifications.load()">Actualizar</button>
+  </section>
+
+  <p class="error" *ngIf="notifications.error()">{{ notifications.error() }}</p>
+  <p class="loading" *ngIf="notifications.loading()">Cargando notificaciones...</p>
+
+  <section class="list">
+    <article
+      *ngFor="let notification of filteredNotifications()"
+      [ngClass]="[notificationTone(notification), notifications.isUnread(notification) ? 'unread' : '']"
+    >
+      <div class="notification-icon">
+        <span>{{ notificationIcon(notification) }}</span>
+      </div>
+
+      <div class="notification-content">
+        <span class="state">{{ notifications.isUnread(notification) ? 'No leida' : 'Leida' }}</span>
+        <h2>{{ notification.titulo || 'Notificacion SAVORA' }}</h2>
+        <p>{{ notification.mensaje }}</p>
+        <small>{{ notification.fecha_notificacion | date: 'medium' }}</small>
+      </div>
+
+      <button type="button" *ngIf="notifications.isUnread(notification)" (click)="markAsRead(notification)">
+        Marcar leida
+      </button>
+    </article>
+
+    <div class="empty" *ngIf="!notifications.loading() && filteredNotifications().length === 0">
+      <img src="/landing/carrito.png" alt="SAVORA">
+      <strong>No hay notificaciones para este filtro.</strong>
+      <p>Cuando SAVORA genere avisos de pedidos, entregas o promociones, apareceran aqui.</p>
+    </div>
+  </section>
+</main>

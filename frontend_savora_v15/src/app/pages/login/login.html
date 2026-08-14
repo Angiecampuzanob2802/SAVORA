@@ -1,0 +1,223 @@
+<main class="login-shell">
+  <section class="login-hero">
+    <a routerLink="/" class="brand">
+      <span>
+        <img src="/landing/carrito.png" alt="Savora">
+      </span>
+      SAVORA
+    </a>
+
+    <div class="hero-copy">
+      <div class="hero-content">
+        <div class="hero-text">
+          <p class="eyebrow">Porque aprovechar sabe mejor</p>
+
+          <h1>Bienvenido a SAVORA</h1>
+
+          <p>
+            Aprovecha alimentos, reduce desperdicio y gestiona tus pedidos
+            desde un solo lugar.
+          </p>
+        </div>
+
+        <div class="hero-image">
+          <img src="/landing/savora-brand.png" alt="Savora">
+        </div>
+      </div>
+    </div>
+
+    <div class="benefits">
+      <article>
+        <strong>Menos desperdicio  🌿</strong>
+        <span>Productos próximos a vencer con mejor salida.</span>
+      </article>
+
+      <article>
+        <strong>Más ahorro  💰</strong>
+        <span>Ofertas útiles para clientes y aliados.</span>
+      </article>
+
+      <article>
+        <strong>Mejor gestión  📊</strong>
+        <span>Inventario, pedidos y entregas conectados.</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="login-panel">
+    <a routerLink="/" class="home-link">
+      <i class="fa-solid fa-arrow-left"></i>
+      Volver al inicio
+    </a>
+
+    <form
+      class="login-card"
+      *ngIf="mode() === 'login'"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+    >
+      <div class="card-heading">
+        <p class="eyebrow">Acceso seguro</p>
+        <h2>Iniciar sesión</h2>
+        <span>Ingresa con tu cuenta de administrador, aliado, cliente o logística.</span>
+      </div>
+
+      <label class="field">
+        <span>Correo electrónico</span>
+        <div class="input-wrap">
+          <i class="fa-solid fa-at"></i>
+          <input
+            type="email"
+            formControlName="correo"
+            placeholder="admin@savora.com"
+            autocomplete="email"
+          />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Contraseña</span>
+        <div class="input-wrap">
+          <i class="fa-solid fa-lock"></i>
+          <input
+            type="password"
+            formControlName="contrasena"
+            placeholder="Tu contraseña"
+            autocomplete="current-password"
+          />
+        </div>
+      </label>
+
+      <div class="form-options">
+        <label class="remember">
+          <input type="checkbox" />
+          <span>Recordarme</span>
+        </label>
+
+        <button type="button" class="text-action" (click)="switchMode('reset')">
+          Olvidé mi contraseña
+        </button>
+      </div>
+
+      <p class="success" *ngIf="success()">{{ success() }}</p>
+      <p class="error" *ngIf="error()">{{ error() }}</p>
+
+      <button class="primary-button" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Ingresando...' : 'Iniciar sesión' }}
+      </button>
+
+      <button class="google-button" type="button" (click)="switchMode('google')">
+        <span>G</span>
+        Continuar con Google
+      </button>
+
+      <p class="register-text">
+        ¿Aún no tienes cuenta?
+        <a routerLink="/register-business">
+          Registra tu negocio
+        </a>
+      </p>
+    </form>
+
+    <form
+      class="login-card"
+      *ngIf="mode() === 'reset'"
+      [formGroup]="resetForm"
+      (ngSubmit)="submitReset()"
+    >
+      <div class="card-heading">
+        <p class="eyebrow">Recuperación</p>
+        <h2>Restablecer contraseña</h2>
+        <span>Escribe tu correo y crea una nueva contraseña para volver a ingresar.</span>
+      </div>
+
+      <label class="field">
+        <span>Correo electrónico</span>
+        <div class="input-wrap">
+          <i class="fa-solid fa-at"></i>
+          <input
+            type="email"
+            formControlName="correo"
+            placeholder="tu-correo@savora.com"
+            autocomplete="email"
+          />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Nueva contraseña</span>
+        <div class="input-wrap">
+          <i class="fa-solid fa-key"></i>
+          <input
+            type="password"
+            formControlName="nueva_contrasena"
+            placeholder="Mínimo 6 caracteres"
+            autocomplete="new-password"
+          />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Confirmar contraseña</span>
+        <div class="input-wrap">
+          <i class="fa-solid fa-shield-halved"></i>
+          <input
+            type="password"
+            formControlName="confirmar_contrasena"
+            placeholder="Repite tu contraseña"
+            autocomplete="new-password"
+          />
+        </div>
+      </label>
+
+      <p class="error" *ngIf="error()">{{ error() }}</p>
+
+      <button class="primary-button" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Actualizando...' : 'Actualizar contraseña' }}
+      </button>
+
+      <button class="secondary-button" type="button" (click)="switchMode('login')">
+        Volver al inicio de sesión
+      </button>
+    </form>
+
+    <form
+      class="login-card"
+      *ngIf="mode() === 'google'"
+      [formGroup]="googleForm"
+      (ngSubmit)="submitGoogleEmail()"
+    >
+      <div class="card-heading">
+        <p class="eyebrow">Acceso con Google</p>
+        <h2>Continúa con tu correo</h2>
+        <span>
+          Por ahora validamos tu correo registrado en SAVORA. La conexión OAuth real con Google
+          se puede activar después.
+        </span>
+      </div>
+
+      <label class="field">
+        <span>Correo de Google</span>
+        <div class="input-wrap">
+          <i class="fa-brands fa-google"></i>
+          <input
+            type="email"
+            formControlName="correo"
+            placeholder="correo@gmail.com"
+            autocomplete="email"
+          />
+        </div>
+      </label>
+
+      <p class="error" *ngIf="error()">{{ error() }}</p>
+
+      <button class="primary-button" type="submit" [disabled]="loading()">
+        {{ loading() ? 'Verificando...' : 'Continuar' }}
+      </button>
+
+      <button class="secondary-button" type="button" (click)="switchMode('login')">
+        Usar correo y contraseña
+      </button>
+    </form>
+  </section>
+</main>

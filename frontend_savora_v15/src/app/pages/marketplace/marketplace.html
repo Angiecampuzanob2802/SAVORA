@@ -1,0 +1,305 @@
+﻿<main class="market-shell">
+  <header class="market-nav">
+    <a routerLink="/" class="brand" aria-label="Ir al inicio de SAVORA">
+      <span>
+        <img src="/landing/carrito.png" alt="Savora">
+      </span>
+      SAVORA
+    </a>
+
+    <nav aria-label="Navegacion de tienda">
+      <a routerLink="/perfil">Perfil</a>
+      <a *ngIf="session.canAccess('admin')" routerLink="/admin">Panel</a>
+      <a *ngIf="session.canAccess('establecimiento')" routerLink="/establecimiento">Establecimiento</a>
+      <a *ngIf="session.canAccess('logistica')" routerLink="/logistica">Logistica</a>
+      <a routerLink="/notificaciones">
+        Notificaciones
+        <span class="nav-badge" *ngIf="notifications.unreadCount()">{{ notifications.unreadCount() }}</span>
+      </a>
+      <button type="button" class="link-button" (click)="goBack()">Volver</button>
+      <button type="button" class="link-button" (click)="logout()">Salir</button>
+      <a class="cart-pill" routerLink="/cliente" fragment="carrito" aria-label="Ir al carrito">
+        <span class="cart-icon" aria-hidden="true"></span>
+        <strong>Carrito</strong>
+        <b>{{ cartCount() }}</b>
+      </a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Tienda cliente</p>
+      <h1>Tienda de ofertas recuperadas cerca de ti.</h1>
+      <p>Explora alimentos disponibles, filtra por categoria y reserva antes del horario limite.</p>
+    </div>
+
+    <div class="search-panel">
+      <span>{{ filteredProducts().length }} ofertas</span>
+      <input type="search" placeholder="Buscar producto..." [value]="query()" (input)="updateQuery($event)" />
+      <small>{{ selectedCategoryLabel() }}</small>
+    </div>
+  </section>
+
+  <section class="categories" aria-label="Categorias de productos">
+    <button type="button" [class.active]="selectedCategory() === null" (click)="setCategory(null)">
+      <span>Todo</span>
+    </button>
+    <button
+      type="button"
+      *ngFor="let category of categories()"
+      [class.active]="selectedCategory() === category.id_categoria"
+      (click)="setCategory(category.id_categoria)"
+    >
+      <span>{{ category.nombre }}</span>
+    </button>
+  </section>
+
+  <section class="shop-layout">
+    <section class="product-grid" aria-label="Productos disponibles">
+      <article class="product-card" *ngFor="let product of filteredProducts()">
+        <div class="product-art">
+          <img [src]="productImage(product)" [alt]="product.nombre" />
+          <span class="offer-badge">Oferta</span>
+          <span class="stock-badge">Stock {{ product.stock ?? 0 }}</span>
+        </div>
+
+        <div class="product-content">
+          <span class="category-pill">{{ categoryName(product) }}</span>
+          <h2>{{ product.nombre }}</h2>
+          <strong>{{ product.precio_venta | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+
+          <div class="product-actions">
+            <button
+              type="button"
+              class="detail-product-button"
+              aria-haspopup="dialog"
+              [attr.aria-label]="'Ver detalle de ' + product.nombre"
+              (click)="openProductDetail(product)"
+            >
+              <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+              Ver detalle
+            </button>
+
+            <button
+              type="button"
+              class="add-product-button"
+              [class.added]="isInCart(product.id_producto)"
+              (click)="addToCart(product)"
+            >
+              {{ isInCart(product.id_producto) ? 'Agregar otro' : 'Agregar al carrito' }}
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <article class="empty-products" *ngIf="filteredProducts().length === 0">
+        <strong>No hay productos para este filtro.</strong>
+        <span>Prueba con otra categoria o cambia la busqueda.</span>
+      </article>
+    </section>
+
+    <aside class="cart" id="carrito">
+      <div class="cart-heading">
+        <span class="cart-big-icon" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">Reserva</p>
+          <h2>Tu carrito</h2>
+        </div>
+      </div>
+
+      <div class="cart-empty" *ngIf="cart().length === 0">Aun no has agregado productos.</div>
+
+      <article class="cart-item" *ngFor="let item of cart()">
+        <img [src]="productImage(item.product)" [alt]="item.product.nombre" />
+
+        <div class="cart-item-info">
+          <strong>{{ item.product.nombre }}</strong>
+          <span>{{ item.product.precio_venta | currency: 'COP ' : 'symbol' : '1.0-0' }}</span>
+        </div>
+
+        <div class="quantity">
+          <button type="button" aria-label="Restar producto" (click)="changeQuantity(item.product.id_producto, -1)">-</button>
+          <b>{{ item.quantity }}</b>
+          <button type="button" aria-label="Sumar producto" (click)="changeQuantity(item.product.id_producto, 1)">+</button>
+        </div>
+
+        <button type="button" class="remove-item" aria-label="Eliminar producto" (click)="removeFromCart(item.product.id_producto)">x</button>
+      </article>
+
+      <button type="button" class="clear-cart" *ngIf="cart().length" (click)="clearCart()">
+        Vaciar carrito
+      </button>
+
+      <label>
+        <span>Direccion de entrega</span>
+        <input type="text" placeholder="Calle, barrio, referencia" [value]="address()" (input)="updateAddress($event)" />
+      </label>
+
+      <label>
+        <span>Metodo de pago</span>
+        <select [value]="paymentMethod()" (change)="updatePaymentMethod($event)">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Nequi">Nequi</option>
+          <option value="Daviplata">Daviplata</option>
+          <option value="Transferencia">Transferencia</option>
+        </select>
+      </label>
+
+      <div class="cart-total">
+        <span>Total</span>
+        <strong>{{ cartTotal() | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+      </div>
+
+      <p class="message" *ngIf="checkoutMessage()">{{ checkoutMessage() }}</p>
+      <p class="error" *ngIf="checkoutError()">{{ checkoutError() }}</p>
+
+      <button type="button" class="checkout" [disabled]="checkingOut()" (click)="checkout()">
+        {{ checkingOut() ? 'Creando pedido...' : 'Confirmar reserva' }}
+      </button>
+    </aside>
+  </section>
+
+  <section class="orders-history">
+    <div class="section-title">
+      <p class="eyebrow">Seguimiento</p>
+      <h2>Mis pedidos</h2>
+    </div>
+
+    <div class="status-filters">
+      <button
+        type="button"
+        *ngFor="let status of orderStatuses()"
+        [class.active]="selectedOrderStatus() === status"
+        (click)="setOrderStatus(status)"
+      >
+        {{ status }}
+      </button>
+    </div>
+
+    <article *ngIf="myOrders().length === 0" class="empty-state">
+      No hay pedidos para este filtro.
+    </article>
+
+    <article class="order-card" *ngFor="let order of myOrders()">
+      <header>
+        <div>
+          <strong>Pedido #{{ order.id_pedido }}</strong>
+          <span>{{ order.fecha_pedido || 'Sin fecha' }}</span>
+        </div>
+        <b>{{ order.estado_pedido }}</b>
+      </header>
+
+      <div class="order-meta">
+        <span>{{ order.direccion_entrega || 'Sin direccion' }}</span>
+        <span>{{ order.metodo_pago || 'Sin metodo de pago' }}</span>
+        <strong>{{ order.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+      </div>
+
+      <button type="button" class="detail-button" (click)="openOrderDetail(order)">Ver detalle</button>
+    </article>
+  </section>
+
+  <section
+    class="modal-backdrop"
+    *ngIf="selectedOrder() || selectedProduct()"
+    (click)="closeOpenDetails()"
+  ></section>
+
+  <aside
+    class="detail-modal product-detail-modal"
+    *ngIf="selectedProduct() as product"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="market-product-detail-title"
+  >
+    <header>
+      <div>
+        <p class="eyebrow">Conoce lo que vas a disfrutar</p>
+        <h2 id="market-product-detail-title">{{ product.nombre }}</h2>
+      </div>
+      <button type="button" (click)="closeProductDetail()" aria-label="Cerrar detalle del producto">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        Cerrar
+      </button>
+    </header>
+
+    <div class="product-detail-hero">
+      <div class="product-detail-image">
+        <img [src]="productImage(product)" [alt]="product.nombre" />
+        <span>Oferta SAVORA</span>
+      </div>
+
+      <div class="product-detail-summary">
+        <span class="category-pill">{{ categoryName(product) }}</span>
+        <strong>{{ product.precio_venta | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+        <small>{{ product.stock ?? 0 }} unidad(es) disponibles</small>
+      </div>
+    </div>
+
+    <section class="description-panel">
+      <h3>
+        <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+        Ingredientes y preparación
+      </h3>
+      <p>{{ product.descripcion || 'El establecimiento no ha registrado todavía la descripción de este producto.' }}</p>
+    </section>
+
+    <footer class="product-detail-footer">
+      <div>
+        <small>Precio de la oferta</small>
+        <strong>{{ product.precio_venta | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+      </div>
+      <button
+        type="button"
+        class="modal-add-button"
+        [class.added]="isInCart(product.id_producto)"
+        (click)="addToCart(product)"
+      >
+        <i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+        {{ isInCart(product.id_producto) ? 'Agregar otro' : 'Agregar al carrito' }}
+      </button>
+    </footer>
+  </aside>
+
+  <aside class="detail-modal" *ngIf="selectedOrder() as order">
+    <header>
+      <div>
+        <p class="eyebrow">Detalle de pedido</p>
+        <h2>Pedido #{{ order.id_pedido }}</h2>
+      </div>
+      <button type="button" (click)="closeOrderDetail()">Cerrar</button>
+    </header>
+
+    <dl class="detail-grid">
+      <div>
+        <dt>Estado</dt>
+        <dd>{{ order.estado_pedido }}</dd>
+      </div>
+      <div>
+        <dt>Fecha</dt>
+        <dd>{{ order.fecha_pedido || 'Sin fecha' }}</dd>
+      </div>
+      <div>
+        <dt>Direccion</dt>
+        <dd>{{ order.direccion_entrega || 'Sin direccion' }}</dd>
+      </div>
+      <div>
+        <dt>Pago</dt>
+        <dd>{{ order.metodo_pago || 'Sin metodo' }}</dd>
+      </div>
+    </dl>
+
+    <div class="modal-lines">
+      <div *ngFor="let item of selectedOrderItems()">
+        <span>{{ productName(item.id_producto) }}</span>
+        <span>x {{ item.cantidad }}</span>
+        <strong>{{ item.subtotal | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <footer>
+      <span>Total</span>
+      <strong>{{ order.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+    </footer>
+  </aside>
+</main>

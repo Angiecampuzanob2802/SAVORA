@@ -1,0 +1,88 @@
+<main class="register-shell">
+  <header class="register-header">
+    <a routerLink="/" class="brand">
+      <span>
+        <img src="/landing/carrito.png" alt="Savora">
+      </span>
+      SAVORA
+    </a>
+
+    <a routerLink="/login" class="login-link">Iniciar sesión</a>
+  </header>
+
+  <section class="register-title">
+    <p class="eyebrow">Aliados SAVORA</p>
+    <h1>Registra tu negocio</h1>
+    <p>
+      Sé parte de la solución. Publica productos próximos a vencer,
+      reduce desperdicio y genera nuevas ventas.
+    </p>
+  </section>
+
+  <section class="register-content">
+    <div class="register-photo">
+      <img src="/landing/atencion.png" alt="Negocio aliado SAVORA">
+    </div>
+
+    <form class="register-form" (submit)="submitRequest($event)">
+      <div class="field full">
+        <input name="nombre_propietario" type="text" placeholder="Nombre del propietario">
+      </div>
+
+      <div class="field">
+        <input name="correo" type="email" placeholder="Correo electrónico">
+      </div>
+
+      <div class="field">
+        <input name="celular" type="text" placeholder="Celular">
+      </div>
+
+      <div class="field">
+        <input name="nombre_establecimiento" type="text" placeholder="Nombre del establecimiento">
+      </div>
+
+      <div class="field">
+        <select name="tipo_negocio">
+          <option value="">Tipo de negocio</option>
+          <option>Restaurante</option>
+          <option>Panadería</option>
+          <option>Supermercado</option>
+          <option>Hotel</option>
+          <option>Frutería</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <input name="ciudad" type="text" placeholder="Ciudad">
+      </div>
+
+      <div class="field">
+        <input name="direccion" type="text" placeholder="Dirección">
+      </div>
+
+      <div class="field full">
+        <textarea name="mensaje" placeholder="Mensaje opcional"></textarea>
+      </div>
+
+      <div class="captcha-box">
+        <label>
+          <input type="checkbox">
+          <span>No soy un robot</span>
+        </label>
+        <strong>reCAPTCHA</strong>
+      </div>
+
+      <p class="success-message" *ngIf="sent()">
+        Solicitud enviada correctamente. Te llevaremos al inicio de sesión.
+      </p>
+
+      <p class="error-message" *ngIf="error()">
+        {{ error() }}
+      </p>
+
+      <button type="submit" [disabled]="loading() || sent()">
+        {{ loading() ? 'Enviando...' : sent() ? 'Solicitud enviada' : 'Enviar solicitud' }}
+      </button>
+    </form>
+  </section>
+</main>

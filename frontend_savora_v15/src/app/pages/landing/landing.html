@@ -1,0 +1,262 @@
+<main class="landing-shell">
+  <span class="orb orb-one"></span>
+  <span class="orb orb-two"></span>
+  <span class="orb orb-three"></span>
+
+  <header class="nav">
+    <a class="brand" href="#inicio" (click)="scrollToSection('inicio', $event)" aria-label="Ir al inicio de SAVORA">
+      <span><img src="/landing/carrito.png" alt=""></span>
+      <strong>SAVORA</strong>
+    </a>
+
+    <nav aria-label="Navegacion principal">
+      <a href="#inicio" (click)="scrollToSection('inicio', $event)">Inicio</a>
+      <a href="#como-funciona" (click)="scrollToSection('como-funciona', $event)">Como funciona</a>
+      <a href="#ofertas" (click)="scrollToSection('ofertas', $event)">Ofertas</a>
+      <a href="#aliados" (click)="scrollToSection('aliados', $event)">Aliados</a>
+      <a href="#app" (click)="scrollToSection('app', $event)">Descargar</a>
+    </nav>
+
+    <a class="nav-action" routerLink="/login">Ingresar</a>
+  </header>
+
+  <section class="hero" id="inicio">
+    <div class="hero-copy">
+      <p class="eyebrow">Recuperacion inteligente de alimentos</p>
+      <h1>Aprovecha ofertas frescas antes de que se pierdan.</h1>
+      <p class="lead">
+        SAVORA conecta restaurantes, panaderias, hoteles y supermercados con clientes que buscan
+        alimentos en buen estado, mejores precios y entregas organizadas desde una sola plataforma.
+      </p>
+
+      <div class="hero-actions">
+        <a class="primary-action" routerLink="/cliente">Ver ofertas</a>
+        <a class="secondary-action" routerLink="/register-business">Registrar mi negocio</a>
+      </div>
+
+      <dl class="metrics">
+        <div *ngFor="let metric of metrics">
+          <dt>{{ metric.value }}</dt>
+          <dd>{{ metric.label }}</dd>
+        </div>
+      </dl>
+
+      <div class="impact-strip">
+        <article *ngFor="let impact of impacts">
+          <span><i [class]="impact.icon"></i></span>
+          <strong>{{ impact.title }}</strong>
+          <p>{{ impact.text }}</p>
+        </article>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-label="Vista previa de la app SAVORA">
+      <span class="ring ring-one"></span>
+      <span class="ring ring-two"></span>
+
+      <img class="food food-a" src="/productos/cheescake.png" alt="Cheesecake en oferta">
+      <img class="food food-b" src="/productos/sadwich-mixto.png" alt="Sandwich en promocion">
+      <img class="food food-c" src="/productos/cafe-americano.png" alt="Cafe americano disponible">
+
+      <div class="phone-preview">
+        <span class="phone-notch"></span>
+        <p>Mi ubicacion</p>
+        <small>Radio de 5 km</small>
+        <div class="phone-search">Buscar productos, tiendas...</div>
+        <h2>Ofertas cerca de ti</h2>
+
+        <article *ngFor="let product of products.slice(0, 3)">
+          <img [src]="product.image" [alt]="product.name">
+          <div>
+            <span>{{ product.tag }}</span>
+            <strong>{{ product.name }}</strong>
+            <small>{{ product.store }}</small>
+          </div>
+          <b>{{ product.price }}</b>
+        </article>
+      </div>
+
+      <div class="planet-card">
+        <span><img src="/landing/carrito.png" alt=""></span>
+        <strong>Bueno para ti. Mejor para el planeta.</strong>
+      </div>
+
+      <div class="stock-alert">
+        <span></span>
+        <div>
+          <strong>Quedan 3 packs</strong>
+          <p>Retiro hoy antes de las 7:00 p.m.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps section" id="como-funciona">
+    <div class="process-layout">
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">Como funciona</p>
+          <h2>Encuentra, reserva y aprovecha en tres pasos.</h2>
+          <p>Una experiencia simple para clientes y una operacion ordenada para los aliados.</p>
+        </div>
+
+        <div class="step-grid">
+          <article *ngFor="let step of steps">
+            <span><i [class]="step.icon"></i></span>
+            <small>{{ step.label }}</small>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.text }}</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="process-visual" aria-label="Ruta visual de compra SAVORA">
+        <span class="route-dot dot-one"></span>
+        <span class="route-dot dot-two"></span>
+        <span class="route-dot dot-three"></span>
+        <div class="route-line"></div>
+
+        <article class="route-card route-card-a">
+          <i class="fa-solid fa-location-dot"></i>
+          <strong>Cerca de ti</strong>
+          <p>Negocios disponibles en tu zona.</p>
+        </article>
+
+        <article class="route-card route-card-b">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <strong>Reserva lista</strong>
+          <p>Confirmacion clara del pedido.</p>
+        </article>
+
+        <article class="route-card route-card-c">
+          <i class="fa-solid fa-clock"></i>
+          <strong>Horario limite</strong>
+          <p>Entrega o recogida programada.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="offers section" id="ofertas">
+    <div class="section-heading">
+      <p class="eyebrow">Productos disponibles</p>
+      <h2>Ofertas que se actualizan con inventario real.</h2>
+      <p>Publica productos proximos a vencer, activa descuentos y permite que los clientes reserven antes del horario limite.</p>
+    </div>
+
+    <div class="offer-carousel" aria-label="Carrusel de ofertas SAVORA">
+      <div class="carousel-track">
+        <article class="offer-card" *ngFor="let product of products">
+          <div class="offer-image">
+            <img [src]="product.image" [alt]="product.name">
+            <span>{{ product.remaining }}</span>
+          </div>
+          <div class="offer-content">
+            <span>{{ product.tag }}</span>
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.store }}</p>
+            <div class="price-row">
+              <del>{{ product.oldPrice }}</del>
+              <strong>{{ product.price }}</strong>
+            </div>
+            <button type="button">Reservar</button>
+          </div>
+        </article>
+
+        <article class="offer-card" *ngFor="let product of products">
+          <div class="offer-image">
+            <img [src]="product.image" [alt]="product.name">
+            <span>{{ product.remaining }}</span>
+          </div>
+          <div class="offer-content">
+            <span>{{ product.tag }}</span>
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.store }}</p>
+            <div class="price-row">
+              <del>{{ product.oldPrice }}</del>
+              <strong>{{ product.price }}</strong>
+            </div>
+            <button type="button">Reservar</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="allies section" id="aliados">
+    <div class="ally-copy">
+      <p class="eyebrow">Para establecimientos</p>
+      <h2>Publica excedentes, controla stock y mide movimientos.</h2>
+      <p>
+        SAVORA ayuda a restaurantes, panaderias, supermercados y hoteles a convertir productos proximos a vencer
+        en oportunidades visibles para clientes cercanos.
+      </p>
+      <div class="ally-actions">
+        <a class="primary-action" routerLink="/register-business">Registrar negocio</a>
+        <a class="secondary-action" routerLink="/establecimiento">Abrir panel aliado</a>
+      </div>
+    </div>
+
+    <div class="ally-dashboard" aria-label="Resumen visual para aliados">
+      <div class="ally-topbar">
+        <span></span>
+        <strong>Panel aliado</strong>
+        <small>Activo hoy</small>
+      </div>
+
+      <div class="ally-live">
+        <article>
+          <span>Hoy</span>
+          <strong>12 productos</strong>
+          <p>Publicados con descuento.</p>
+        </article>
+
+        <article>
+          <span>Stock</span>
+          <strong>3 alertas</strong>
+          <p>Proximos a vencer.</p>
+        </article>
+      </div>
+
+      <div class="ally-stats">
+        <article *ngFor="let ally of allies">
+          <i [class]="ally.icon"></i>
+          <small>{{ ally.label }}</small>
+          <strong>{{ ally.stat }}</strong>
+          <p>{{ ally.text }}</p>
+        </article>
+      </div>
+
+      <div class="ally-products">
+        <img src="/productos/capuccino.png" alt="Cappuccino publicado">
+        <img src="/productos/cheescake.png" alt="Cheesecake publicado">
+        <img src="/productos/papas.png" alt="Papas publicadas">
+        <strong>Promociones activas</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="download section" id="app">
+    <div>
+      <p class="eyebrow">Web y movil</p>
+      <h2>Una experiencia lista para crecer hacia app movil.</h2>
+      <p>
+        Prueba la vista movil de SAVORA desde el entorno Ionic local y conserva una experiencia conectada con la web.
+      </p>
+    </div>
+
+    <div class="download-preview">
+      <img src="/landing/phone.png" alt="Vista movil SAVORA">
+      <div class="store-buttons" aria-label="Abrir app movil">
+        <a [href]="mobileAppUrl" target="_blank" rel="noopener">
+          <i class="fa-brands fa-apple"></i>
+          App Store
+        </a>
+        <a [href]="mobileAppUrl" target="_blank" rel="noopener">
+          <i class="fa-brands fa-google-play"></i>
+          Google Play
+        </a>
+      </div>
+    </div>
+  </section>
+</main>

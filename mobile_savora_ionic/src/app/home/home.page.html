@@ -1,0 +1,445 @@
+<ion-header class="savora-header" [translucent]="true">
+  <ion-toolbar>
+    <div class="app-topbar">
+      <div class="brand-row">
+        <div class="brand-mark">
+          <img src="assets/landing/carrito.png" alt="SAVORA" />
+        </div>
+        <div>
+          <strong>SAVORA</strong>
+          <span>{{ loadingLocation ? 'Buscando ubicación' : 'Radio de 5 km' }}</span>
+        </div>
+      </div>
+
+      <button type="button" class="cart-chip" (click)="setTab('bolsa')">
+        Bolsa
+        <span *ngIf="cartCount">{{ cartCount }}</span>
+      </button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="savora-shell" [fullscreen]="true">
+  <main class="mobile-frame">
+    <section class="hero-card" *ngIf="activeTab === 'inicio'">
+      <div class="hero-copy">
+        <p class="eyebrow">Ofertas cerca de ti</p>
+        <h1>Rescata comida fresca antes de que se pierda.</h1>
+        <p>
+          Explora tiendas aliadas, reserva productos con descuento y ayuda a reducir el
+          desperdicio alimentario.
+        </p>
+      </div>
+
+      <div class="hero-phone">
+        <span class="phone-line"></span>
+        <strong>SAVORA</strong>
+        <small>Promociones activas</small>
+
+        <div class="phone-product" *ngFor="let product of visibleOffers.slice(0, 2)">
+          <img [src]="productImage(product)" [alt]="product.nombre" />
+          <div>
+            <b>{{ product.nombre }}</b>
+            <span>${{ product.precio_venta | number: '1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="impact-strip" *ngIf="activeTab === 'inicio'">
+      <article>
+        <strong>Hasta 50%</strong>
+        <span>Ofertas activas</span>
+      </article>
+      <article>
+        <strong>Retiro hoy</strong>
+        <span>Reserva rápida</span>
+      </article>
+      <article>
+        <strong>Stock vivo</strong>
+        <span>Inventario real</span>
+      </article>
+    </section>
+
+    <section class="search-panel">
+      <div class="search-heading">
+        <div>
+          <p class="eyebrow">Buscar</p>
+          <h2>¿Qué quieres aprovechar hoy?</h2>
+        </div>
+
+        <button type="button" (click)="loadLocationAndStores()">Actualizar</button>
+      </div>
+
+      <ion-input
+        [(ngModel)]="search"
+        placeholder="Pan, café, almuerzo, postre..."
+        fill="outline"
+      ></ion-input>
+
+      <div class="quick-chips">
+        <button type="button" (click)="search = ''">Todo</button>
+        <button type="button" (click)="search = 'pan'">Panadería</button>
+        <button type="button" (click)="search = 'cafe'">Café</button>
+        <button type="button" (click)="search = 'almuerzo'">Almuerzo</button>
+      </div>
+    </section>
+
+    <section class="promo-ribbon" *ngIf="activeTab === 'inicio'">
+      <ng-container *ngIf="visibleOffers[0] as featuredProduct">
+        <span class="pulse-dot"></span>
+        <div>
+          <strong>{{ featuredProduct.nombre }}</strong>
+          <p>Disponible hoy · Stock {{ featuredProduct.stock }}</p>
+        </div>
+        <b>${{ featuredProduct.precio_venta | number: '1.0-0' }}</b>
+      </ng-container>
+    </section>
+
+    <p class="api-message" *ngIf="apiError">{{ apiError }}</p>
+
+    <section
+      class="map-card"
+      aria-label="Mapa de tiendas cercanas"
+      *ngIf="activeTab === 'inicio' || activeTab === 'mapa'"
+    >
+      <div class="section-title compact">
+        <div>
+          <p class="eyebrow">Mapa cercano</p>
+          <h2>Tiendas aliadas</h2>
+        </div>
+
+        <ion-badge>{{ filteredStores.length }} activas</ion-badge>
+      </div>
+
+      <div id="savora-map"></div>
+
+      <ion-card class="store-sheet" *ngIf="activeStore">
+        <ion-card-content>
+          <div class="store-sheet-header">
+            <img [src]="storeImage(activeStore)" [alt]="activeStore.nombre" />
+            <div>
+              <span>{{ activeStore.tipo }} · {{ formatDistance(activeStore) }}</span>
+              <h3>{{ activeStore.nombre }}</h3>
+            </div>
+          </div>
+          <p>
+            {{
+              activeStore.descripcion ||
+              activeStore.direccion ||
+              'Productos disponibles para reservar hoy.'
+            }}
+          </p>
+
+          <div class="mini-products" *ngIf="activeStore.productos.length">
+            <strong *ngFor="let product of activeStore.productos.slice(0, 2)">
+              {{ product.nombre }} · ${{ product.precio_venta | number: '1.0-0' }}
+            </strong>
+          </div>
+
+          <ion-button size="small" (click)="showStoreProducts(activeStore)">
+            Ver productos
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </section>
+
+    <section
+      class="stores-list"
+      *ngIf="filteredStores.length && (activeTab === 'inicio' || activeTab === 'mapa')"
+    >
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Cercanas</p>
+          <h2>Selecciona una tienda</h2>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="store-row"
+        *ngFor="let store of filteredStores"
+        [class.active]="activeStore?.id_establecimiento === store.id_establecimiento"
+        (click)="selectStore(store)"
+      >
+        <div class="store-photo">
+          <img [src]="storeImage(store)" [alt]="store.nombre" />
+        </div>
+
+        <div>
+          <strong>{{ store.nombre }}</strong>
+          <span>{{ store.tipo }} · {{ formatDistance(store) }}</span>
+        </div>
+
+        <small>{{ store.productos.length }} productos</small>
+      </button>
+    </section>
+
+    <section class="offers" *ngIf="activeTab === 'inicio'">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Recomendado</p>
+          <h2>Promociones de hoy</h2>
+        </div>
+
+        <button type="button" (click)="showStoreProducts()">Ver todo</button>
+      </div>
+
+      <article class="offer-card" *ngFor="let product of visibleOffers">
+        <img [src]="productImage(product)" [alt]="product.nombre" />
+
+        <div>
+          <ion-badge>Oferta</ion-badge>
+          <h3>{{ product.nombre }}</h3>
+          <p>{{ product.descripcion || 'Producto recuperado disponible' }}</p>
+        </div>
+
+        <div class="price">
+          <strong>${{ product.precio_venta | number: '1.0-0' }}</strong>
+          <span>Stock {{ product.stock }}</span>
+        </div>
+      </article>
+
+      <article
+        class="offer-card fallback"
+        *ngFor="let offer of fallbackOffers"
+        [hidden]="visibleOffers.length"
+      >
+        <img [src]="offer.image" [alt]="offer.name" />
+
+        <div>
+          <ion-badge>{{ offer.tag }}</ion-badge>
+          <h3>{{ offer.name }}</h3>
+          <p>{{ offer.store }}</p>
+        </div>
+
+        <div class="price">
+          <strong>{{ offer.price }}</strong>
+          <span>{{ offer.before }}</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="products-panel" *ngIf="activeTab === 'ofertas' && activeStore">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Productos</p>
+          <h2>{{ activeStore.nombre }}</h2>
+        </div>
+
+        <ion-badge>{{ activeProducts.length }} disponibles</ion-badge>
+      </div>
+
+      <article class="product-card" *ngFor="let product of activeProducts">
+        <img [src]="productImage(product)" [alt]="product.nombre" />
+
+        <div class="product-info">
+          <ion-badge>Stock {{ product.stock }}</ion-badge>
+          <h3>{{ product.nombre }}</h3>
+          <p>{{ product.descripcion || 'Producto recuperado disponible para reservar.' }}</p>
+        </div>
+
+        <div class="product-actions">
+          <strong>${{ product.precio_venta | number: '1.0-0' }}</strong>
+
+          <div class="qty-control" *ngIf="quantityFor(product); else addButton">
+            <button type="button" (click)="removeFromCart(product)">-</button>
+            <span>{{ quantityFor(product) }}</span>
+            <button type="button" (click)="addToCart(product)">+</button>
+          </div>
+
+          <ng-template #addButton>
+            <button type="button" class="add-button" (click)="addToCart(product)">
+              Agregar
+            </button>
+          </ng-template>
+        </div>
+      </article>
+
+      <p class="empty-state" *ngIf="!activeProducts.length">
+        Esta tienda aún no tiene productos activos.
+      </p>
+    </section>
+
+    <section class="cart-panel" *ngIf="activeTab === 'bolsa'">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Bolsa</p>
+          <h2>Tu reserva</h2>
+        </div>
+
+        <ion-badge>{{ cartCount }} items</ion-badge>
+      </div>
+
+      <div class="cart-summary" *ngIf="cartItems.length; else emptyCart">
+        <p>Pedido en</p>
+        <h3>{{ cartStoreName }}</h3>
+
+        <article class="cart-row" *ngFor="let item of cartItems">
+          <img [src]="productImage(item.product)" [alt]="item.product.nombre" />
+
+          <div>
+            <strong>{{ item.product.nombre }}</strong>
+            <span>
+              ${{ item.product.precio_venta | number: '1.0-0' }} x {{ item.quantity }}
+            </span>
+          </div>
+
+          <div class="qty-control">
+            <button type="button" (click)="removeFromCart(item.product)">-</button>
+            <span>{{ item.quantity }}</span>
+            <button type="button" (click)="addToCart(item.product, item.store)">+</button>
+          </div>
+        </article>
+
+        <div class="total-row">
+          <span>Total</span>
+          <strong>${{ cartTotal | number: '1.0-0' }}</strong>
+        </div>
+
+        <p class="cart-note">Método de entrega inicial: retiro en tienda.</p>
+
+        <ion-button expand="block" (click)="confirmCart()">
+          Confirmar pedido
+        </ion-button>
+
+        <button type="button" class="clear-button" (click)="clearCart()">
+          Vaciar bolsa
+        </button>
+      </div>
+
+      <ng-template #emptyCart>
+        <div class="empty-cart">
+          <h3>Tu bolsa está vacía</h3>
+          <p>Elige una tienda cercana y agrega productos recuperados.</p>
+
+          <ion-button (click)="setTab('mapa')">
+            Ver tiendas
+          </ion-button>
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="profile-panel" *ngIf="activeTab === 'perfil'">
+      <p class="eyebrow">Perfil</p>
+
+      <div *ngIf="currentUser; else loginForm" class="session-card">
+        <div class="avatar" aria-label="Usuario conectado">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 12.2c2.35 0 4.25-1.9 4.25-4.25S14.35 3.7 12 3.7s-4.25 1.9-4.25 4.25 1.9 4.25 4.25 4.25Zm0 2.05c-3.15 0-6.75 1.6-6.75 4.05v.65c0 .75.6 1.35 1.35 1.35h10.8c.75 0 1.35-.6 1.35-1.35v-.65c0-2.45-3.6-4.05-6.75-4.05Z"
+            />
+          </svg>
+        </div>
+
+        <div>
+          <h2>{{ currentUser.nombre }}</h2>
+          <p>{{ currentUser.correo }}</p>
+          <ion-badge>{{ currentUser.nombre_rol || 'Cliente' }}</ion-badge>
+        </div>
+
+        <ion-button expand="block" (click)="setTab('bolsa')" *ngIf="cartCount">
+          Ir a la bolsa
+        </ion-button>
+
+        <button type="button" class="clear-button" (click)="logout()">
+          Cerrar sesión
+        </button>
+      </div>
+
+      <ng-template #loginForm>
+        <h2>Ingresa a tu cuenta</h2>
+        <p>Conecta tu usuario para confirmar pedidos y guardar tus reservas.</p>
+
+        <div class="login-form">
+          <label for="login-correo">Correo</label>
+          <ion-input
+            id="login-correo"
+            [(ngModel)]="loginCorreo"
+            inputmode="email"
+            placeholder="cliente@savora.com"
+            fill="outline"
+          ></ion-input>
+
+          <label for="login-contrasena">Contraseña</label>
+          <ion-input
+            id="login-contrasena"
+            [(ngModel)]="loginContrasena"
+            type="password"
+            placeholder="Tu contraseña"
+            fill="outline"
+          ></ion-input>
+
+          <p class="api-message compact" *ngIf="loginError">
+            {{ loginError }}
+          </p>
+
+          <ion-button expand="block" [disabled]="loginLoading" (click)="login()">
+            {{ loginLoading ? 'Entrando...' : 'Entrar' }}
+          </ion-button>
+        </div>
+      </ng-template>
+    </section>
+  </main>
+
+  <button
+    type="button"
+    class="floating-cart"
+    *ngIf="cartCount && activeTab !== 'bolsa'"
+    (click)="setTab('bolsa')"
+  >
+    Ver bolsa
+    <span>{{ cartCount }}</span>
+  </button>
+
+  <nav class="bottom-tabs" aria-label="Navegación principal">
+    <button
+      type="button"
+      [class.active]="activeTab === 'inicio'"
+      (click)="setTab('inicio')"
+    >
+      Inicio
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'mapa'"
+      (click)="setTab('mapa')"
+    >
+      Mapa
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'ofertas'"
+      (click)="showStoreProducts()"
+    >
+      Ofertas
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'bolsa'"
+      (click)="setTab('bolsa')"
+    >
+      Bolsa
+      <span *ngIf="cartCount">{{ cartCount }}</span>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'perfil'"
+      (click)="setTab('perfil')"
+    >
+      Perfil
+    </button>
+  </nav>
+
+  <div class="toast success" *ngIf="checkoutMessage">
+    {{ checkoutMessage }}
+  </div>
+
+  <div class="toast error" *ngIf="checkoutError">
+    {{ checkoutError }}
+  </div>
+</ion-content>

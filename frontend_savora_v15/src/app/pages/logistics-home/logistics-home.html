@@ -1,0 +1,240 @@
+<main class="log-shell">
+  <header class="topbar">
+    <a routerLink="/" class="brand">
+      <span>
+        <img src="/landing/carrito.png" alt="SAVORA">
+      </span>
+      SAVORA
+    </a>
+
+    <nav aria-label="Menu logistico">
+      <a routerLink="/perfil">Perfil</a>
+      <a *ngIf="session.canAccess('cliente')" routerLink="/cliente">Tienda</a>
+      <a *ngIf="session.canAccess('establecimiento')" routerLink="/establecimiento">Establecimiento</a>
+      <a *ngIf="session.canAccess('admin')" routerLink="/admin">Admin</a>
+      <a routerLink="/notificaciones">
+        Notificaciones
+        <span class="nav-badge" *ngIf="notifications.unreadCount()">{{ notifications.unreadCount() }}</span>
+      </a>
+      <button type="button" (click)="goBack()">Volver</button>
+      <button type="button" (click)="logout()">Salir</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Centro logistico</p>
+      <h1>Entregas organizadas, clientes informados y pedidos a tiempo.</h1>
+      <p>
+        Programa pedidos listos, revisa entregas activas y cambia estados para mantener la operacion de SAVORA
+        conectada de principio a fin.
+      </p>
+
+      <div class="hero-actions">
+        <button type="button" (click)="scrollTo('programar-entrega')">Programar entrega</button>
+        <button type="button" class="ghost" (click)="scrollTo('entregas-activas')">Ver entregas</button>
+        <button type="button" class="ghost" (click)="loadData()">Actualizar datos</button>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-label="Vista visual de logistica SAVORA">
+      <div class="route-ring ring-one"></div>
+      <div class="route-ring ring-two"></div>
+      <img class="log-gif" src="/gif/logistica.gif" alt="Animacion de logistica SAVORA">
+      <div class="route-card">
+        <span>Ruta activa</span>
+        <strong>{{ inRouteDeliveries().length }}</strong>
+        <small>Entrega(s) en camino</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Resumen logistico">
+    <article *ngFor="let item of statCards()" [class]="'stat-card ' + item.tone">
+      <span class="stat-icon">{{ item.icon }}</span>
+      <div>
+        <p>{{ item.label }}</p>
+        <strong>{{ item.value }}</strong>
+        <small>{{ item.note }}</small>
+      </div>
+    </article>
+  </section>
+
+  <section class="quick-panel" aria-label="Acciones rapidas">
+    <button type="button" (click)="selectNextReadyOrder()">Tomar siguiente pedido</button>
+    <button type="button" (click)="setDeliveryStatus('Activas'); scrollTo('entregas-activas')">Entregas activas</button>
+    <button type="button" (click)="setDeliveryStatus('En camino'); scrollTo('entregas-activas')">En camino</button>
+    <button type="button" (click)="setDeliveryStatus('Entregada'); scrollTo('entregas-activas')">Entregadas</button>
+  </section>
+
+  <p class="message" *ngIf="message()">{{ message() }}</p>
+  <p class="error" *ngIf="error()">{{ error() }}</p>
+
+  <section class="work-grid">
+    <article class="form-card" id="programar-entrega">
+      <div class="section-title">
+        <p class="eyebrow">Programacion</p>
+        <h2>Programar entrega</h2>
+        <span>Aqui aparecen los pedidos que ya estan listos para entregar.</span>
+      </div>
+
+      <label>
+        Pedido
+        <select [value]="deliveryForm().id_pedido" (change)="updateForm('id_pedido', $event); fillAddressFromOrder()">
+          <option [value]="0">Selecciona un pedido</option>
+          <option *ngFor="let order of readyOrders()" [value]="order.id_pedido">
+            Pedido #{{ order.id_pedido }} - {{ order.estado_pedido }}
+          </option>
+        </select>
+      </label>
+
+      <div class="selected-order" *ngIf="selectedOrder() as order">
+        <span>Pedido seleccionado</span>
+        <strong>#{{ order.id_pedido }}</strong>
+        <small>{{ order.total | currency: 'COP ' : 'symbol' : '1.0-0' }} · {{ order.metodo_pago || 'Pago no definido' }}</small>
+      </div>
+
+      <label>
+        Fecha programada
+        <input type="date" [value]="deliveryForm().fecha_programada" (input)="updateForm('fecha_programada', $event)" />
+      </label>
+
+      <label>
+        Direccion
+        <input type="text" [value]="deliveryForm().direccion_entrega" (input)="updateForm('direccion_entrega', $event)" />
+      </label>
+
+      <label>
+        Observaciones
+        <textarea
+          rows="3"
+          [value]="deliveryForm().observaciones"
+          (input)="updateForm('observaciones', $event)"
+          placeholder="Ej: llamar antes de llegar, dejar en porteria..."
+        ></textarea>
+      </label>
+
+      <button type="button" class="wide-action" (click)="createDelivery()">Programar entrega</button>
+    </article>
+
+    <article class="orders-card">
+      <div class="section-title">
+        <p class="eyebrow">Pedidos listos</p>
+        <h2>Cola de salida</h2>
+        <span>{{ readyOrders().length }} pedido(s) disponibles para programar.</span>
+      </div>
+
+      <div class="empty-state" *ngIf="readyOrders().length === 0">
+        <strong>No hay pedidos listos por ahora.</strong>
+        <p>Cuando un pedido pase a Listo para entregar, aparecera aqui.</p>
+      </div>
+
+      <div class="ready-order" *ngFor="let order of readyOrders().slice(0, 5)">
+        <div>
+          <strong>Pedido #{{ order.id_pedido }}</strong>
+          <span>{{ order.direccion_entrega || 'Sin direccion registrada' }}</span>
+          <small>{{ order.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</small>
+        </div>
+        <button type="button" (click)="selectOrder(order)">Programar</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="deliveries-panel" id="entregas-activas">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">Seguimiento</p>
+        <h2>Entregas activas</h2>
+      </div>
+
+      <div class="status-filters">
+        <button
+          type="button"
+          *ngFor="let status of deliveryStatusFilters"
+          [class.active]="selectedDeliveryStatus() === status"
+          (click)="setDeliveryStatus(status)"
+        >
+          {{ status }}
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="activeDeliveries().length === 0">
+      <strong>No hay entregas en este filtro.</strong>
+      <p>Cambia el filtro o programa una nueva entrega.</p>
+    </div>
+
+    <div class="delivery-list" *ngIf="activeDeliveries().length">
+      <article class="delivery-row" *ngFor="let delivery of activeDeliveries()" [class]="deliveryTone(delivery.estado_entrega)">
+        <span class="status-dot"></span>
+        <div>
+          <strong>Entrega #{{ delivery.id_entrega }}</strong>
+          <span>Pedido #{{ delivery.id_pedido }} · {{ delivery.estado_entrega || 'Programada' }}</span>
+          <small>{{ delivery.direccion_entrega || 'Sin direccion' }}</small>
+        </div>
+        <div>
+          <span>{{ delivery.fecha_programada || 'Sin fecha programada' }}</span>
+          <strong>{{ orderFor(delivery.id_pedido)?.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+        </div>
+        <button type="button" (click)="openDeliveryDetail(delivery)">Ver detalle</button>
+      </article>
+    </div>
+  </section>
+
+  <section class="modal-backdrop" *ngIf="selectedDelivery()" (click)="closeDeliveryDetail()"></section>
+
+  <aside class="detail-modal" *ngIf="selectedDelivery() as delivery">
+    <header>
+      <div>
+        <p class="eyebrow">Detalle de entrega</p>
+        <h2>Entrega #{{ delivery.id_entrega }}</h2>
+      </div>
+      <button type="button" (click)="closeDeliveryDetail()">Cerrar</button>
+    </header>
+
+    <dl class="detail-grid">
+      <div>
+        <dt>Pedido</dt>
+        <dd>#{{ delivery.id_pedido }}</dd>
+      </div>
+      <div>
+        <dt>Estado</dt>
+        <dd>{{ delivery.estado_entrega || 'Programada' }}</dd>
+      </div>
+      <div>
+        <dt>Fecha programada</dt>
+        <dd>{{ delivery.fecha_programada || 'Sin fecha' }}</dd>
+      </div>
+      <div>
+        <dt>Total pedido</dt>
+        <dd>{{ orderFor(delivery.id_pedido)?.total | currency: 'COP ' : 'symbol' : '1.0-0' }}</dd>
+      </div>
+      <div class="wide">
+        <dt>Direccion</dt>
+        <dd>{{ delivery.direccion_entrega || 'Sin direccion' }}</dd>
+      </div>
+      <div class="wide">
+        <dt>Observaciones</dt>
+        <dd>{{ delivery.observaciones || 'Sin observaciones' }}</dd>
+      </div>
+    </dl>
+
+    <label class="status-control">
+      Cambiar estado de entrega
+      <select [value]="delivery.estado_entrega || 'Programada'" (change)="updateDeliveryStatus(delivery, $event)">
+        <option value="Programada">Programada</option>
+        <option value="En camino">En camino</option>
+        <option value="Entregada">Entregada</option>
+        <option value="Cancelada">Cancelada</option>
+      </select>
+    </label>
+
+    <div class="modal-lines">
+      <div *ngFor="let item of orderItems(delivery.id_pedido)">
+        <span>{{ productName(item.id_producto) }}</span>
+        <span>x {{ item.cantidad }}</span>
+        <strong>{{ item.subtotal | currency: 'COP ' : 'symbol' : '1.0-0' }}</strong>
+      </div>
+    </div>
+  </aside>
+</main>

@@ -1,0 +1,24 @@
+<section class="toast-region" aria-label="Notificaciones del sistema" aria-live="polite" aria-relevant="additions">
+  @for (message of toast.messages(); track message.id) {
+    <article
+      class="toast"
+      [class]="'toast toast--' + message.type"
+      [attr.role]="message.type === 'error' ? 'alert' : 'status'"
+      aria-atomic="true"
+    >
+      <span class="toast__icon" aria-hidden="true">{{ icon(message) }}</span>
+      <div class="toast__content">
+        <strong>{{ message.title }}</strong>
+        <p>{{ message.message }}</p>
+      </div>
+      <button
+        type="button"
+        class="toast__close"
+        aria-label="Cerrar notificación"
+        (click)="toast.dismiss(message.id)"
+      >
+        ×
+      </button>
+    </article>
+  }
+</section>

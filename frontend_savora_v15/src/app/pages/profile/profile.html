@@ -1,0 +1,141 @@
+<main class="profile-shell">
+  <header class="topbar">
+    <a routerLink="/" class="brand">
+      <span>
+        <img src="/landing/carrito.png" alt="SAVORA">
+      </span>
+      SAVORA
+    </a>
+
+    <nav aria-label="Menu de perfil">
+      <a *ngIf="session.canAccess('cliente')" routerLink="/cliente">Tienda</a>
+      <a *ngIf="session.canAccess('establecimiento')" routerLink="/establecimiento">Establecimiento</a>
+      <a *ngIf="session.canAccess('logistica')" routerLink="/logistica">Logistica</a>
+      <a *ngIf="session.canAccess('admin')" routerLink="/admin">Admin</a>
+      <a routerLink="/notificaciones">
+        Notificaciones
+        <span class="nav-badge" *ngIf="notifications.unreadCount()">{{ notifications.unreadCount() }}</span>
+      </a>
+      <button type="button" (click)="goBack()">Volver</button>
+      <button type="button" (click)="logout()">Salir</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Mi perfil SAVORA</p>
+      <h1>Tu cuenta, tus datos y tu acceso en un solo lugar.</h1>
+      <p>
+        Mantén actualizado tu contacto para recibir notificaciones, gestionar pedidos y navegar por SAVORA de
+        acuerdo con tu rol.
+      </p>
+
+      <div class="hero-actions">
+        <button type="button" (click)="goToPrimaryRoute()">{{ primaryRouteLabel() }}</button>
+        <button type="button" class="ghost" routerLink="/notificaciones">Ver notificaciones</button>
+        <button type="button" class="ghost" (click)="loadProfile()">Actualizar perfil</button>
+      </div>
+    </div>
+
+    <aside class="profile-badge">
+      <div class="avatar">
+        <img src="/landing/carrito.png" alt="SAVORA">
+        <strong>{{ initials() }}</strong>
+      </div>
+      <span>Cuenta conectada</span>
+      <h2>{{ form.controls.nombre.value || session.user()?.nombre || 'Usuario SAVORA' }}</h2>
+      <p>{{ roleLabel() }}</p>
+      <div class="completion">
+        <span>Perfil completo</span>
+        <strong>{{ profileCompletion() }}%</strong>
+        <div>
+          <i [style.width.%]="profileCompletion()"></i>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="profile-cards" aria-label="Resumen de cuenta">
+    <article *ngFor="let item of profileCards()" [class]="'info-card ' + item.tone">
+      <span>{{ item.label }}</span>
+      <strong>{{ item.value }}</strong>
+    </article>
+  </section>
+
+  <p class="message" *ngIf="message()">{{ message() }}</p>
+  <p class="error" *ngIf="error()">{{ error() }}</p>
+
+  <section class="content-grid">
+    <article class="profile-card">
+      <div class="section-heading">
+        <p class="eyebrow">Datos personales</p>
+        <h2>Actualizar información</h2>
+        <span>Estos datos ayudan a que SAVORA mantenga contacto y soporte correcto.</span>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <label>
+          Nombre
+          <input type="text" formControlName="nombre" placeholder="Tu nombre completo" />
+        </label>
+
+        <label>
+          Telefono
+          <input type="text" formControlName="telefono" placeholder="3001234567" />
+        </label>
+
+        <label>
+          Direccion
+          <input type="text" formControlName="direccion" placeholder="Ciudad, barrio, referencia" />
+        </label>
+
+        <label>
+          Nueva contraseña
+          <div class="password-wrap">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="contrasena"
+              placeholder="Déjala vacía si no quieres cambiarla"
+            />
+            <button type="button" (click)="togglePassword()">
+              {{ showPassword() ? 'Ocultar' : 'Ver' }}
+            </button>
+          </div>
+        </label>
+
+        <button class="save-button" type="submit" [disabled]="loading()">
+          {{ loading() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </form>
+    </article>
+
+    <aside class="tips-card">
+      <p class="eyebrow">Recomendaciones</p>
+      <h2>Cuenta más segura</h2>
+
+      <div class="tip">
+        <span>01</span>
+        <div>
+          <strong>Actualiza tu teléfono</strong>
+          <p>Ayuda a validar entregas, pedidos y contacto con aliados.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span>02</span>
+        <div>
+          <strong>Usa una contraseña clara para ti</strong>
+          <p>Si cambias contraseña, guarda una que recuerdes y no compartas.</p>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span>03</span>
+        <div>
+          <strong>Revisa tus notificaciones</strong>
+          <p>Allí aparecen cambios de pedidos, entregas y actividad importante.</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+</main>
