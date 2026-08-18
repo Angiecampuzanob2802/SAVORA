@@ -5,6 +5,22 @@ versionamiento semántico. Las etapas anteriores a la adopción formal de Git se
 reconstruyeron a partir de entregas y respaldos disponibles; no representan
 etiquetas históricas verificables.
 
+## [1.1.0] - 2026-08-17
+
+### Mejorado
+
+- Diseño adaptable del inicio de sesión, sin superposiciones en pantallas medianas o móviles.
+- Paleta pastel unificada y botón de acceso en una sola tonalidad verde.
+- Controles accesibles para mostrar u ocultar las contraseñas.
+- Presentación profesional de la tarjeta de detalle de productos del cliente.
+- Organización visual del detalle y formulario de edición de productos del establecimiento.
+- Fondos, espaciado, estados de foco, botones y ventanas modales modernizados.
+
+### Verificado
+
+- Compilación de producción y prerenderizado de nueve rutas.
+- Adaptación del login en escritorio, pantalla mediana y dispositivo móvil.
+
 ## [1.0.0] - 2026-08-13
 
 ### Agregado
@@ -45,4 +61,3 @@ etiquetas históricas verificables.
 ### Reconstruido
 
 - Estructura inicial y configuración del proyecto SAVORA.
-

@@ -80,11 +80,16 @@
         <div class="input-wrap">
           <i class="fa-solid fa-lock"></i>
           <input
-            type="password"
+            [type]="showPassword() ? 'text' : 'password'"
             formControlName="contrasena"
             placeholder="Tu contraseña"
             autocomplete="current-password"
           />
+          <button class="password-toggle" type="button" (click)="togglePassword('login')"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            [attr.aria-pressed]="showPassword()">
+            <i [class]="showPassword() ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
+          </button>
         </div>
       </label>
 
@@ -149,11 +154,16 @@
         <div class="input-wrap">
           <i class="fa-solid fa-key"></i>
           <input
-            type="password"
+            [type]="showNewPassword() ? 'text' : 'password'"
             formControlName="nueva_contrasena"
             placeholder="Mínimo 6 caracteres"
             autocomplete="new-password"
           />
+          <button class="password-toggle" type="button" (click)="togglePassword('new')"
+            [attr.aria-label]="showNewPassword() ? 'Ocultar nueva contraseña' : 'Mostrar nueva contraseña'"
+            [attr.aria-pressed]="showNewPassword()">
+            <i [class]="showNewPassword() ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
+          </button>
         </div>
       </label>
 
@@ -162,11 +172,16 @@
         <div class="input-wrap">
           <i class="fa-solid fa-shield-halved"></i>
           <input
-            type="password"
+            [type]="showPasswordConfirmation() ? 'text' : 'password'"
             formControlName="confirmar_contrasena"
             placeholder="Repite tu contraseña"
             autocomplete="new-password"
           />
+          <button class="password-toggle" type="button" (click)="togglePassword('confirmation')"
+            [attr.aria-label]="showPasswordConfirmation() ? 'Ocultar confirmación' : 'Mostrar confirmación'"
+            [attr.aria-pressed]="showPasswordConfirmation()">
+            <i [class]="showPasswordConfirmation() ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
+          </button>
         </div>
       </label>
 

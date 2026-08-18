@@ -34,6 +34,9 @@ export class Login implements OnInit {
   readonly error = signal('');
   readonly success = signal('');
   readonly loading = signal(false);
+  readonly showPassword = signal(false);
+  readonly showNewPassword = signal(false);
+  readonly showPasswordConfirmation = signal(false);
 
   readonly form = new FormGroup({
     correo: new FormControl('', [Validators.required, Validators.email]),
@@ -77,6 +80,18 @@ export class Login implements OnInit {
       const correo = this.form.controls.correo.value ?? '';
       this.googleForm.patchValue({ correo });
     }
+  }
+
+  togglePassword(field: 'login' | 'new' | 'confirmation'): void {
+    if (field === 'login') {
+      this.showPassword.update((visible) => !visible);
+      return;
+    }
+    if (field === 'new') {
+      this.showNewPassword.update((visible) => !visible);
+      return;
+    }
+    this.showPasswordConfirmation.update((visible) => !visible);
   }
 
   submit(): void {
