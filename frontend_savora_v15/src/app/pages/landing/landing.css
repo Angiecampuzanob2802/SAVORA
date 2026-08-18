@@ -186,8 +186,10 @@
 .secondary-action,
 .store-buttons a:last-child {
   padding: 13px 24px;
-  background: rgba(255, 255, 255, .9);
-  border: 1px solid var(--savora-border);
+  background: var(--savora-action);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  color: var(--savora-white);
+  box-shadow: 0 16px 34px rgba(23, 52, 38, 0.24);
 }
 
 .nav-action:hover,
@@ -924,6 +926,32 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
+}
+
+.store-buttons .google-play-button {
+  min-width: 190px;
+  justify-content: center;
+}
+
+.google-play-button i {
+  color: #c9efad;
+  font-size: 24px;
+}
+
+.google-play-button span,
+.google-play-button small {
+  display: block;
+}
+
+.google-play-button small {
+  margin-bottom: 2px;
+  color: #dff2d4;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.store-buttons .google-play-button:hover {
+  background: var(--savora-action-hover);
 }
 
 @keyframes navDrop {

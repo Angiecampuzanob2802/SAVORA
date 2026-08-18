@@ -89,6 +89,7 @@ export class HomePage implements AfterViewInit, OnDestroy {
   checkoutError = '';
   loginCorreo = localStorage.getItem('savora_last_email') || '';
   loginContrasena = '';
+  showLoginPassword = false;
   loginLoading = false;
   loginError = '';
   currentUser: LoginResponse | null = this.loadStoredUser();
@@ -288,6 +289,10 @@ export class HomePage implements AfterViewInit, OnDestroy {
     this.checkoutError = '';
   }
 
+  toggleLoginPassword(): void {
+    this.showLoginPassword = !this.showLoginPassword;
+  }
+
   confirmCart(): void {
     if (!this.cartItems.length) {
       this.checkoutError = 'Agrega al menos un producto antes de confirmar.';
@@ -318,9 +323,9 @@ export class HomePage implements AfterViewInit, OnDestroy {
       })
       .subscribe({
         next: (response) => {
+          this.clearCart();
           this.checkoutMessage = `${response.mensaje}. Pedido #${response.id_pedido}`;
           this.checkoutError = '';
-          this.clearCart();
           this.loadStores();
         },
         error: () => {
@@ -625,6 +630,14 @@ export class HomePage implements AfterViewInit, OnDestroy {
   }
 
   private hasCoordinates(store: Store): store is Store & { latitud: number; longitud: number } {
-    return Number.isFinite(Number(store.latitud)) && Number.isFinite(Number(store.longitud));
+    if (store.latitud === null || store.longitud === null) {
+      return false;
+    }
+
+    const latitude = Number(store.latitud);
+    const longitude = Number(store.longitud);
+    return Number.isFinite(latitude) && Number.isFinite(longitude)
+      && latitude >= -90 && latitude <= 90
+      && longitude >= -180 && longitude <= 180;
   }
 }

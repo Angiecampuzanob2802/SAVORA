@@ -44,7 +44,7 @@ from app.routes.solicitud_negocio_route import router as solicitud_negocio_route
 app = FastAPI(
     title="SAVORA API",
     description="API para la plataforma de recuperacion y gestion de alimentos.",
-    version="1.1.1",
+    version="1.2.0",
 )
 
 app.add_middleware(

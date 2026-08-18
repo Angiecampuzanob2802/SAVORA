@@ -987,6 +987,30 @@ ion-button {
   font-weight: 950;
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field ion-input {
+  --padding-end: 54px;
+}
+
+.password-field button {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: var(--savora-green-soft);
+  color: var(--savora-green-dark);
+  transform: translateY(-50%);
+}
+
 .avatar {
   width: 74px;
   height: 74px;

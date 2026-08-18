@@ -362,13 +362,19 @@
           ></ion-input>
 
           <label for="login-contrasena">Contraseña</label>
+          <div class="password-field">
           <ion-input
             id="login-contrasena"
             [(ngModel)]="loginContrasena"
-            type="password"
+            [type]="showLoginPassword ? 'text' : 'password'"
             placeholder="Tu contraseña"
             fill="outline"
           ></ion-input>
+          <button type="button" (click)="toggleLoginPassword()"
+            [attr.aria-label]="showLoginPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            <i [class]="showLoginPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" aria-hidden="true"></i>
+          </button>
+          </div>
 
           <p class="api-message compact" *ngIf="loginError">
             {{ loginError }}

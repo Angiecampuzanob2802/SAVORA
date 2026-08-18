@@ -5,6 +5,26 @@ versionamiento semántico. Las etapas anteriores a la adopción formal de Git se
 reconstruyeron a partir de entregas y respaldos disponibles; no representan
 etiquetas históricas verificables.
 
+## [1.2.0] - 2026-08-17
+
+### Agregado
+
+- Botón Google Play con identidad visual SAVORA y enlace de búsqueda en la tienda.
+- Control para mostrar u ocultar la contraseña en la aplicación móvil.
+- Ruta móvil de respaldo para direcciones inexistentes.
+
+### Mejorado
+
+- Identidad técnica Android actualizada a `com.savora.app` y nombre visible `SAVORA`.
+- Validación de coordenadas geográficas antes de dibujar establecimientos en el mapa.
+- Conservación del mensaje de confirmación después de crear exitosamente un pedido móvil.
+
+### Verificado
+
+- Navegación web hacia Google Play.
+- Inicio de sesión móvil y visibilidad de contraseña.
+- Redirección de rutas móviles y ausencia de errores en consola.
+
 ## [1.1.1] - 2026-08-17
 
 ### Corregido

@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'mobile_savora_ionic',
+  appId: 'com.savora.app',
+  appName: 'SAVORA',
   webDir: 'www'
 };
 
