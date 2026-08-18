@@ -13,6 +13,9 @@
   --savora-white: #ffffff;
   --savora-border: #dce6d7;
   --savora-shadow: 0 22px 60px rgba(23, 52, 38, 0.1);
+  --savora-action: #4c7a50;
+  --savora-action-hover: #3d6742;
+  --savora-action-soft: #e7f1e3;
 }
 
 * {

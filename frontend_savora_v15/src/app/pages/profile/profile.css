@@ -185,9 +185,9 @@ button {
 .save-button {
   min-height: 50px;
   padding: 0 22px;
-  background: linear-gradient(135deg, var(--savora-green), var(--savora-orange));
+  background: var(--savora-action);
   color: var(--savora-white);
-  box-shadow: 0 16px 34px rgba(242, 140, 40, 0.22);
+  box-shadow: 0 16px 34px rgba(36, 91, 42, 0.2);
 }
 
 .hero-actions .ghost {

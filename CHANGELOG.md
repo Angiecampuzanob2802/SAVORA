@@ -5,6 +5,21 @@ versionamiento semántico. Las etapas anteriores a la adopción formal de Git se
 reconstruyeron a partir de entregas y respaldos disponibles; no representan
 etiquetas históricas verificables.
 
+## [1.1.1] - 2026-08-17
+
+### Corregido
+
+- Imagen promocional del login completamente estática.
+- Botones principales unificados con una tonalidad verde pastel sólida.
+- Acciones «Reservar» conectadas con el inicio de sesión.
+- Redirección segura al inicio para rutas inexistentes.
+
+### Verificado
+
+- Auditoría estática de los 100 botones del frontend.
+- Navegación pública, recuperación de contraseña y control para mostrarla.
+- Protección de las rutas de cliente, establecimiento, administración, logística, perfil y notificaciones.
+
 ## [1.1.0] - 2026-08-17
 
 ### Mejorado

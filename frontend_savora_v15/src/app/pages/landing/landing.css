@@ -701,13 +701,24 @@
   font-size: 24px;
 }
 
-.offer-card button {
+.offer-card .offer-content > a {
+  display: block;
   width: 100%;
   border: 0;
+  border-radius: 12px;
   padding: 13px 18px;
   color: var(--savora-white);
-  background: var(--savora-green);
+  background: var(--savora-action);
   cursor: pointer;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.offer-card .offer-content > a:hover {
+  background: var(--savora-action-hover);
+  transform: translateY(-2px);
 }
 
 .allies {

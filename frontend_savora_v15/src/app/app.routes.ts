@@ -54,5 +54,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/register-business/register-business')
         .then(c => c.RegisterBusiness)
-  }
+  },
+  {
+    path: '**',
+    redirectTo: '',
+  },
 ];

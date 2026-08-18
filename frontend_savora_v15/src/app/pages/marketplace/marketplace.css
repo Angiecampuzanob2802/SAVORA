@@ -843,7 +843,7 @@ select:focus {
   border-radius: 13px;
   padding: 12px 18px;
   min-height: 48px;
-  background: linear-gradient(135deg, #326b3a, #4f854f);
+  background: var(--savora-action);
   color: #fff;
   font: inherit;
   font-weight: 900;
@@ -853,6 +853,7 @@ select:focus {
 }
 
 .modal-add-button:hover {
+  background: var(--savora-action-hover);
   transform: translateY(-2px);
   box-shadow: 0 16px 28px rgba(36, 91, 42, 0.24);
 }

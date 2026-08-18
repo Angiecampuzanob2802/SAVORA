@@ -222,12 +222,12 @@ h1 {
   border: 0;
   border-radius: 999px;
   padding: 0 18px;
-  background: linear-gradient(135deg, var(--savora-green), var(--savora-orange));
+  background: var(--savora-action);
   color: var(--savora-white);
   font: inherit;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 16px 34px rgba(242, 140, 40, 0.24);
+  box-shadow: 0 16px 34px rgba(36, 91, 42, 0.2);
   transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
 }
 
